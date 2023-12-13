@@ -4,6 +4,7 @@ class Main extends Program{
     final String ASCIILINE = "-----------------------------------------------\n";
     
     Ability newAbility(String effect, int power, String target){
+        //converts string loaded data from spellList into ability class objects
         Ability res = new Ability();
         Effect type;
         switch(effect){
@@ -17,12 +18,12 @@ class Main extends Program{
                 type = Effect.SHIELD;
                 break;
             default:
-                println("Error in spellList: malformed effect");
+                println("Error malformed effect: "+effect);
                 type = null;
                 break;
         }
         res.effectType = type;
-        res.power = (int) power;
+        res.power = power;
         
         Target targ;
         switch(target){
@@ -33,7 +34,7 @@ class Main extends Program{
                 targ = Target.ENNEMY;
                 break; 
             default:
-                println("Error in spellList: malformed target");
+                println("Error malformed target: "+target);
                 targ = null;
                 break;
         }
@@ -78,18 +79,19 @@ class Main extends Program{
     }
 
     Ability[] importAbilities(String data){
-
-        int abilityCount = 1;
+        //parses a stringed list of abilities dumped from spellList.csv, and put them into a list 
+        int abilityCount = 0;
         for(int i = 0; i<length(data);i++){
-            if(data.charAt(i)==',') abilityCount++;
+            if(data.charAt(i)==';') abilityCount++;
         }
 
         Ability[] res = new Ability[abilityCount];
         
         for(int i = 0;i<abilityCount;i++){
-            String effect = data.substring(0,3);
-            int power = Character.getNumericValue(data.charAt(4));
-            String target = data.substring(6,9);
+            int strOffset = i*12;
+            String effect = data.substring(strOffset,strOffset+3);
+            int power = Integer.parseInt(data.substring(strOffset+4,strOffset+7));
+            String target = data.substring(strOffset+8,strOffset+11);
             res[i] = newAbility(effect,power,target);
         }
 
