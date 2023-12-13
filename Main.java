@@ -82,3 +82,4 @@ class Main extends Program{
         SpellBook theBook = initialiseSpellBook();
     }
 }
+test chibre
