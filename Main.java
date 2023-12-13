@@ -76,9 +76,6 @@ class Main extends Program{
         }
         return res;
     }
-    // int toInt(char number){
-
-    // }
 
     Ability[] importAbilities(String data){
 
