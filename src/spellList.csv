@@ -1,4 +1,4 @@
 name, effects
-"slash", "DMG 5 FOE"
-"patch", "HEL 5 PLR"
-"bulk", "SHD 5 PLR"
+slash,DMG 8 FOE
+patch,HEL 5 PLR
+bulk,SHD 5 PLR

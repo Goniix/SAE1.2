@@ -1,7 +1,8 @@
 import extensions.CSVFile;
-class Main extends Program{
+class main extends Program{
+    final String ASCIILINE = "-----------------------------------------------\n";
     
-    Ability newAbility(String effect, char power, String target){
+    Ability newAbility(String effect, int power, String target){
         Ability res = new Ability();
         Effect type;
         switch(effect){
@@ -40,8 +41,43 @@ class Main extends Program{
     }
     String toString(Ability ability){
         String res = "";
+        res+= ability.power+" ";
+        res+= toString(ability.effectType);
+        res+=" to ";
+        res+= toString(ability.targetType);
+
         return res;
     }
+    String toString(Effect type){
+        String res = "";
+        switch(type){
+            case DAMAGE:
+                res="damage";
+                break;
+            case HEAL:
+                res="heal";
+                break;
+            case SHIELD:
+                res="shield";
+                break;
+        }
+        return res;
+    }
+    String toString(Target type){
+        String res = "";
+        switch(type){
+            case PLAYER:
+                res="player";
+                break;
+            case ENNEMY:
+                res="ennemy";
+                break;
+        }
+        return res;
+    }
+    // int toInt(char number){
+
+    // }
 
     Ability[] importAbilities(String data){
 
@@ -54,7 +90,7 @@ class Main extends Program{
         
         for(int i = 0;i<abilityCount;i++){
             String effect = data.substring(0,3);
-            char power = data.charAt(4);
+            int power = Character.getNumericValue(data.charAt(4));
             String target = data.substring(6,9);
             res[i] = newAbility(effect,power,target);
         }
@@ -68,22 +104,37 @@ class Main extends Program{
         res.spellAbilities = abilities;
         return res;
     }
-
+    String toString(Spell spell){
+        String res = "";
+        res +=spell.name+" : ";
+        for(int i = 0; i<length(spell.spellAbilities); i++){
+            res+=toString(spell.spellAbilities[i])+", ";
+        }
+        return res;
+    }
 
     SpellBook initialiseSpellBook(){
         SpellBook res = new SpellBook();
         CSVFile loadedSpells = loadCSV("src/spellList.csv",',');
-        res.allSpells = new Spell[rowCount(loadedSpells)];
-        for(int i = 0; i<rowCount(loadedSpells); i++){
-            String name = getCell(loadedSpells,0,i);
-            Ability[] effects = importAbilities(getCell(loadedSpells,1,i)) ;
-            res.allSpells[i].name = name;
-            res.allSpells[i].spellAbilities = effects;
+        res.allSpells = new Spell[rowCount(loadedSpells)-1];
+        for(int i = 0; i<rowCount(loadedSpells)-1; i++){
+            String name = getCell(loadedSpells,i+1,0);
+            Ability[] effects = importAbilities(getCell(loadedSpells,i+1,1)) ;
+            res.allSpells[i] = newSpell(name,effects);
         }
+        return res;
+    }
+    String toString(SpellBook book){
+        String res = ASCIILINE;
+        for(int i = 0; i<length(book.allSpells); i++){
+            res+=toString(book.allSpells[i])+"\n";
+        }
+        res+= ASCIILINE;
         return res;
     }
 
     void algorithm(){
         SpellBook theBook = initialiseSpellBook();
+        println(toString(theBook));
     }
 }
