@@ -1,6 +1,6 @@
 import extensions.CSVFile;
 import ijava.Curses;
-class main extends Program{
+class Main extends Program{
     final String ASCIILINE = "-----------------------------------------------\n";
     
     Ability newAbility(String effect, int power, String target){
@@ -136,7 +136,6 @@ class main extends Program{
     }
 
     void algorithm(){
-        background(ANSI_GREEN);
         text(ANSI_GREEN);
         SpellBook theBook = initialiseSpellBook();
         println(toString(theBook));
