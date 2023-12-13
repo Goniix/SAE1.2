@@ -136,7 +136,6 @@ class Main extends Program{
     }
 
     void algorithm(){
-        text(ANSI_GREEN);
         SpellBook theBook = initialiseSpellBook();
         println(toString(theBook));
     }
