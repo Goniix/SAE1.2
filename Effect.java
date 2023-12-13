@@ -1,0 +1,1 @@
+enum Effect{DAMAGE,HEAL,SHIELD,BUFF}

@@ -1,5 +1,5 @@
 class Ability{
-    Effects effectType;
+    Effect effectType;
     int power;
     Target targetType;
 }

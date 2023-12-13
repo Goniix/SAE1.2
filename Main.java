@@ -3,16 +3,16 @@ class Main extends Program{
     
     Ability newAbility(String effect, char power, String target){
         Ability res = new Ability();
-        Effects type;
+        Effect type;
         switch(effect){
             case "DMG":
-                type = Effects.DAMAGE;
+                type = Effect.DAMAGE;
                 break;
             case "HEL":
-                type = Effects.HEAL;
+                type = Effect.HEAL;
                 break; 
             case "SHD":
-                type = Effects.SHIELD;
+                type = Effect.SHIELD;
                 break;
             default:
                 println("Error in spellList: malformed effect");
@@ -37,6 +37,10 @@ class Main extends Program{
         }
         res.targetType = targ;
         return res; 
+    }
+    String toString(Ability ability){
+        String res = "";
+        return res;
     }
 
     Ability[] importAbilities(String data){
@@ -65,6 +69,7 @@ class Main extends Program{
         return res;
     }
 
+
     SpellBook initialiseSpellBook(){
         SpellBook res = new SpellBook();
         CSVFile loadedSpells = loadCSV("src/spellList.csv",',');
@@ -82,4 +87,3 @@ class Main extends Program{
         SpellBook theBook = initialiseSpellBook();
     }
 }
-test chibre
