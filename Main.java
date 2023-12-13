@@ -1,4 +1,5 @@
 import extensions.CSVFile;
+import ijava.Curses;
 class main extends Program{
     final String ASCIILINE = "-----------------------------------------------\n";
     
@@ -126,6 +127,7 @@ class main extends Program{
     }
     String toString(SpellBook book){
         String res = ASCIILINE;
+        res+="List of all available spells:\n";
         for(int i = 0; i<length(book.allSpells); i++){
             res+=toString(book.allSpells[i])+"\n";
         }
@@ -134,6 +136,8 @@ class main extends Program{
     }
 
     void algorithm(){
+        background(ANSI_GREEN);
+        text(ANSI_GREEN);
         SpellBook theBook = initialiseSpellBook();
         println(toString(theBook));
     }
