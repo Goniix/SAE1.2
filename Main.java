@@ -112,6 +112,13 @@ class Main extends Program{
         }
         return res;
     }
+    void castSpell(Spell spell){
+        println("Casted "+spell.name+" !");
+        int abilityCount = length(spell.spellAbilities);
+        for(int i = 0; i<abilityCount; i++){
+            
+        }
+    }
 
     SpellBook initialiseSpellBook(){
         SpellBook res = new SpellBook();
