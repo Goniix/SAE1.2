@@ -1,6 +1,7 @@
-name, effects
-Slash,DMG 008 FOE;
-Patch,HEL 005 PLR;
-Bulk,SHD 005 PLR;
-Leech,DMG 005 FOE;HEL 003 PLR;
-Mitigate,DMG 003 PLR;SHD 008 PLR;
+name,effects,
+Slash,DMG 008 FOE;,
+Patch,HEL 005 PLR;,
+Bulk,SHD 005 PLR;,
+Leech,DMG 005 FOE;HEL 003 PLR;,
+Mitigate,DMG 003 PLR;SHD 008 PLR;,
+Expiate,DMG 003 PLR;,

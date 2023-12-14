@@ -3,6 +3,10 @@ import ijava.Curses;
 class Main extends Program{
     final String ASCIILINE = "-----------------------------------------------\n";
     
+    int clamp(int val, int min, int max){
+        return Math.max(min,Math.min(max,val));
+    }
+
     Ability newAbility(String effect, int power, String target){
         //converts string loaded data from spellList into ability class objects
         Ability res = new Ability();
@@ -50,6 +54,41 @@ class Main extends Program{
 
         return res;
     }
+    void executeAbility(Ability ability, Unit targetUnit){
+        int power = ability.power;
+        Effect type = ability.effectType;
+        switch(type){
+            case DAMAGE:
+                power -= targetUnit.shield;
+                targetUnit.shield -= ability.power-power;
+                targetUnit.health -= power;
+                break;
+            case HEAL:
+                targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
+                break;
+            case SHIELD:
+                targetUnit.shield += power;
+                break;
+        }
+    }
+
+    Unit newUnit(Target type, String name){
+        Unit res = new Unit();
+        res.name = name;
+        res.targetType = type;
+        res.maxHealth = 100;
+        res.health = res.maxHealth;
+        res.shield = 0;
+        return res;
+    }
+    String toString(Unit unit){
+        String res = ASCIILINE;
+        res+= "Name: "+ unit.name +"\n";
+        res+= "Health: "+ (unit.health+unit.shield) + " / " + unit.maxHealth + "\n";
+        res+= ASCIILINE;
+        return res;
+    }
+
     String toString(Effect type){
         String res = "";
         switch(type){
@@ -65,6 +104,7 @@ class Main extends Program{
         }
         return res;
     }
+
     String toString(Target type){
         String res = "";
         switch(type){
@@ -77,7 +117,63 @@ class Main extends Program{
         }
         return res;
     }
+    Unit targetToUnit(Target type, Unit player, Unit foe){
+        Unit res = null;
+        switch(type){
+            case PLAYER:
+                res = player;
+                break;
+            case ENNEMY:
+                res = foe;
+                break;
+        }
+        return res;
+    }
 
+    Spell newSpell(String name, Ability[] abilities){
+        Spell res = new Spell();
+        res.name = name;
+        res.spellAbilities = abilities;
+        return res;
+    }
+    String toString(Spell spell){
+        String res = "";
+        res +=spell.name+" : ";
+        for(int i = 0; i<length(spell.spellAbilities); i++){
+            res+=toString(spell.spellAbilities[i])+", ";
+        }
+        return res;
+    }
+    void castSpell(Spell spell,Unit player, Unit foe){
+        println("-> Casted "+spell.name+" !");
+        int abilityCount = length(spell.spellAbilities);
+        for(int i = 0; i<abilityCount; i++){
+            Ability ability = spell.spellAbilities[i];
+            Unit targetUnit = targetToUnit(ability.targetType,player,foe);
+            executeAbility(ability,targetUnit);
+        }
+    }
+
+    SpellBook initialiseSpellBook(){
+        SpellBook res = new SpellBook();
+        CSVFile loadedSpells = loadCSV("src/spellList.csv",',');
+        res.allSpells = new Spell[rowCount(loadedSpells)-1];
+        for(int i = 0; i<rowCount(loadedSpells)-1; i++){
+            String name = getCell(loadedSpells,i+1,0);
+            Ability[] effects = importAbilities(getCell(loadedSpells,i+1,1)) ;
+            res.allSpells[i] = newSpell(name,effects);
+        }
+        return res;
+    }
+    String toString(SpellBook book){
+        String res = ASCIILINE;
+        res+="List of all available spells:\n";
+        for(int i = 0; i<length(book.allSpells); i++){
+            res+=i+": "+toString(book.allSpells[i])+"\n";
+        }
+        res+= ASCIILINE;
+        return res;
+    }
     Ability[] importAbilities(String data){
         //parses a stringed list of abilities dumped from spellList.csv, and put them into a list 
         int abilityCount = 0;
@@ -98,51 +194,13 @@ class Main extends Program{
         return res;
     }
 
-    Spell newSpell(String name, Ability[] abilities){
-        Spell res = new Spell();
-        res.name = name;
-        res.spellAbilities = abilities;
-        return res;
-    }
-    String toString(Spell spell){
-        String res = "";
-        res +=spell.name+" : ";
-        for(int i = 0; i<length(spell.spellAbilities); i++){
-            res+=toString(spell.spellAbilities[i])+", ";
-        }
-        return res;
-    }
-    void castSpell(Spell spell){
-        println("Casted "+spell.name+" !");
-        int abilityCount = length(spell.spellAbilities);
-        for(int i = 0; i<abilityCount; i++){
-            
-        }
-    }
-
-    SpellBook initialiseSpellBook(){
-        SpellBook res = new SpellBook();
-        CSVFile loadedSpells = loadCSV("src/spellList.csv",',');
-        res.allSpells = new Spell[rowCount(loadedSpells)-1];
-        for(int i = 0; i<rowCount(loadedSpells)-1; i++){
-            String name = getCell(loadedSpells,i+1,0);
-            Ability[] effects = importAbilities(getCell(loadedSpells,i+1,1)) ;
-            res.allSpells[i] = newSpell(name,effects);
-        }
-        return res;
-    }
-    String toString(SpellBook book){
-        String res = ASCIILINE;
-        res+="List of all available spells:\n";
-        for(int i = 0; i<length(book.allSpells); i++){
-            res+=toString(book.allSpells[i])+"\n";
-        }
-        res+= ASCIILINE;
-        return res;
-    }
-
     void algorithm(){
         SpellBook theBook = initialiseSpellBook();
         println(toString(theBook));
+        Unit playerUnit = newUnit(Target.PLAYER,"Player");
+        Unit ennemyUnit = null;
+        println(toString(playerUnit));
+        castSpell(theBook.allSpells[5],playerUnit,ennemyUnit);
+        println(toString(playerUnit));
     }
 }
