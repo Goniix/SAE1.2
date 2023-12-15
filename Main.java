@@ -284,7 +284,7 @@ class Main extends Program{
     void algorithm(){
         GameState gameState = GameState.TITLE;
         boolean initGameState = true;
-        boolean run = false;
+        boolean run = true;
         boolean error = false;
 
         SpellBook theBook = initialiseSpellBook();
@@ -304,7 +304,7 @@ class Main extends Program{
 
         int testIndex = 0;
         hide();
-        while(testIndex<200){
+        while(run){
             try{
                 clearScreen();
                 print(toString(castSprite(titleScreen, blankSquare,testIndex%titleScreen.width,0)));
