@@ -177,7 +177,15 @@ class Main extends Program{
             executeAbility(ability,targetUnit);
         }
     }
+
     //SPRITE METHODS--------------------------------------------------------------------------------------------
+    Sprite newEmptySprite(int width, int height){
+        Sprite res = new Sprite();
+        res.width = width;
+        res.height = height;
+        res.image = new String[height];
+        return res;
+    }
     Sprite importSprite(String fileName){
         File importedFile = newFile(fileName);
         int lineNumber = lineCount(fileName);
@@ -203,6 +211,32 @@ class Main extends Program{
     }
     String toString(Sprite sprite){
         String res = "";
+        for(int index = 0; index<sprite.height; index++){
+            res += sprite.image[index]+"\n";
+        }
+        return res;
+    }
+    Sprite castSprite(Sprite targetSprite, Sprite sourceSprite, int x, int y){
+        //casts a sourceSprite into a targetSprite, targetSprite is enlarged if it is too small for the casted sprite(sprite casted at negative coordinates will not show up)
+        int widthOverflow = max((x + sourceSprite.width), targetSprite.width);
+        int heightOverflow = max((y + sourceSprite.height), targetSprite.height);
+
+        Sprite res = newEmptySprite(widthOverflow,heightOverflow);
+        for(int idy = 0; idy<heightOverflow; idy++){
+            res.image[idy]="";
+            for(int idx = 0; idx<widthOverflow; idx++){
+                if((idx>=x && idx<x+sourceSprite.width)&&(idy>=y && idy<y+sourceSprite.height)){
+                    res.image[idy]+= sourceSprite.image[idy-y].charAt(idx-x);
+                }
+                else{
+                    char appenedChar = ' ';
+                    if ((idx>=0 && idx<targetSprite.width)&&(idy>=0 && idy<targetSprite.height)){
+                        appenedChar = targetSprite.image[idy].charAt(idx);
+                    }
+                    res.image[idy] += appenedChar;
+                }
+            }
+        }
         return res;
     }
 
@@ -255,13 +289,33 @@ class Main extends Program{
 
         SpellBook theBook = initialiseSpellBook();
         println(toString(theBook));
+
         Unit playerUnit = newUnit(Target.PLAYER,"Player");
         Unit ennemyUnit = null;
+
         println(toString(playerUnit));
         castSpell(theBook.allSpells[5],playerUnit,ennemyUnit);
         println(toString(playerUnit));
+
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
-        while(run){
+        Sprite blankSquare = importSprite("src/blankSquare.txt");
+        
+        
+
+        int testIndex = 0;
+        hide();
+        while(testIndex<100){
+            try{
+                clearScreen();
+                print(toString(castSprite(titleScreen, blankSquare,testIndex%50,0)));
+                Thread.sleep(200);
+            }
+            catch(InterruptedException e){
+                println(e);
+            }
+            testIndex++;
+            
+            /*
             switch(gameState){
                 case TITLE:
                     if(initGameState){
@@ -283,7 +337,8 @@ class Main extends Program{
                         
                     }
                     break;
-            }
+            }*/
         }
+        show();
     }
 }
