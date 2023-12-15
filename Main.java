@@ -304,13 +304,11 @@ class Main extends Program{
 
         int testIndex = 0;
         hide();
-        while(testIndex<50){
+        while(testIndex<200){
             try{
-                //clearScreen();
-                println();
-                print(toString(castSprite(titleScreen, blankSquare,testIndex%50,0)));
-                println();
-                Thread.sleep(33);
+                clearScreen();
+                print(toString(castSprite(titleScreen, blankSquare,testIndex%titleScreen.width,0)));
+                Thread.sleep(16);
             }
             catch(InterruptedException e){
                 println(e);
