@@ -3,10 +3,12 @@ import ijava.Curses;
 class Main extends Program{
     final String ASCIILINE = "-----------------------------------------------\n";
     
+    //GENERAL METHODS--------------------------------------------------------------------------------------------
     int clamp(int val, int min, int max){
         return Math.max(min,Math.min(max,val));
     }
 
+    //ABILITY METHODS--------------------------------------------------------------------------------------------
     Ability newAbility(String effect, int power, String target){
         //converts string loaded data from spellList into ability class objects
         Ability res = new Ability();
@@ -72,6 +74,7 @@ class Main extends Program{
         }
     }
 
+    //UNIT METHODS--------------------------------------------------------------------------------------------
     Unit newUnit(Target type, String name){
         Unit res = new Unit();
         res.name = name;
@@ -89,6 +92,7 @@ class Main extends Program{
         return res;
     }
 
+    //EFFECT METHODS--------------------------------------------------------------------------------------------
     String toString(Effect type){
         String res = "";
         switch(type){
@@ -105,6 +109,7 @@ class Main extends Program{
         return res;
     }
 
+    //TARGET METHODS--------------------------------------------------------------------------------------------
     String toString(Target type){
         String res = "";
         switch(type){
@@ -130,6 +135,7 @@ class Main extends Program{
         return res;
     }
 
+    //SPELL METHODS--------------------------------------------------------------------------------------------
     Spell newSpell(String name, Ability[] abilities){
         Spell res = new Spell();
         res.name = name;
@@ -154,6 +160,7 @@ class Main extends Program{
         }
     }
 
+    //SPELLBOOK METHODS--------------------------------------------------------------------------------------------
     SpellBook initialiseSpellBook(){
         SpellBook res = new SpellBook();
         CSVFile loadedSpells = loadCSV("src/spellList.csv",',');
