@@ -1,4 +1,5 @@
 import extensions.CSVFile;
+import extensions.File;
 import ijava.Curses;
 class Main extends Program{
     final String ASCIILINE = "-----------------------------------------------\n";
@@ -6,6 +7,19 @@ class Main extends Program{
     //GENERAL METHODS--------------------------------------------------------------------------------------------
     int clamp(int val, int min, int max){
         return Math.max(min,Math.min(max,val));
+    }
+
+    int lineCount(String fileName){
+        File importedFile = newFile(fileName);
+
+        String line = readLine(importedFile);
+
+        int res = 0;
+        while(line != null){
+            line = readLine(importedFile);
+            res++;
+        }
+        return res;
     }
 
     //ABILITY METHODS--------------------------------------------------------------------------------------------
@@ -159,6 +173,29 @@ class Main extends Program{
             executeAbility(ability,targetUnit);
         }
     }
+    //SPRITE METHODS--------------------------------------------------------------------------------------------
+    Sprite importSprite(String fileName){
+        File importedFile = newFile(fileName);
+        int lineNumber = lineCount(fileName);
+
+        Sprite res = new Sprite();
+        res.image = new String[lineNumber];
+
+
+        String line = readLine(importedFile);
+
+        int index = 0;
+        while(line!=null){
+            res.image[index] = line;
+            line = readLine(importedFile);
+
+            index++;
+        }
+        return res;
+    }
+    String toString(Sprite sprite){
+        
+    }
 
     //SPELLBOOK METHODS--------------------------------------------------------------------------------------------
     SpellBook initialiseSpellBook(){
@@ -202,6 +239,11 @@ class Main extends Program{
     }
 
     void algorithm(){
+        GameState gameState = GameState.TITLE;
+        boolean initGameState = true;
+        boolean run = false;
+        boolean error = false;
+
         SpellBook theBook = initialiseSpellBook();
         println(toString(theBook));
         Unit playerUnit = newUnit(Target.PLAYER,"Player");
@@ -209,5 +251,30 @@ class Main extends Program{
         println(toString(playerUnit));
         castSpell(theBook.allSpells[5],playerUnit,ennemyUnit);
         println(toString(playerUnit));
+        Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
+        while(run){
+            switch(gameState){
+                case TITLE:
+                    if(initGameState){
+
+                    }
+                    break;
+                case MAP:
+                    if(initGameState){
+                        
+                    }
+                    break;
+                case COMBAT:
+                    if(initGameState){
+                        
+                    }
+                    break;
+                case SHOP:
+                    if(initGameState){
+                        
+                    }
+                    break;
+            }
+        }
     }
 }

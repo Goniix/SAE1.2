@@ -1,0 +1,1 @@
+enum GameState{TITLE,MAP,COMBAT,SHOP}
