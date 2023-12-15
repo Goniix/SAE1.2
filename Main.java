@@ -22,6 +22,10 @@ class Main extends Program{
         return res;
     }
 
+    int max(int numb1, int numb2){
+        return (numb1>numb2) ? numb1 : numb2;
+    }
+
     //ABILITY METHODS--------------------------------------------------------------------------------------------
     Ability newAbility(String effect, int power, String target){
         //converts string loaded data from spellList into ability class objects
@@ -180,6 +184,8 @@ class Main extends Program{
 
         Sprite res = new Sprite();
         res.image = new String[lineNumber];
+        res.height = lineNumber;
+        int maxWidth = 0;
 
 
         String line = readLine(importedFile);
@@ -187,14 +193,17 @@ class Main extends Program{
         int index = 0;
         while(line!=null){
             res.image[index] = line;
+            maxWidth = max(maxWidth,length(line));
             line = readLine(importedFile);
 
             index++;
         }
+        res.width = maxWidth;
         return res;
     }
     String toString(Sprite sprite){
-        
+        String res = "";
+        return res;
     }
 
     //SPELLBOOK METHODS--------------------------------------------------------------------------------------------
