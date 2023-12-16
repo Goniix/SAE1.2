@@ -239,6 +239,20 @@ class Main extends Program{
         }
         return res;
     }
+    Sprite castSprite(Sprite targetSprite, Sprite sourceSprite, int x, int y){
+        //casts a sourceSprite into a targetSprite
+        Sprite res = newEmptySprite(targetSprite.width,targetSprite.height);
+        for(int idy = 0; idy<targetSprite.height; idy++){
+            res.image[idy]="";
+            for(int idx = 0; idx<targetSprite.width; idx++){
+                if((idx>=x && idx<x+sourceSprite.width)&&(idy>=y && idy<y+sourceSprite.height)){
+                    res.image[idy]+= sourceSprite.image[idy-y].charAt(idx-x);
+                }
+                else res.image[idy] += targetSprite.image[idy].charAt(idx);
+            }
+        }
+        return res;
+    }
 
     //SPELLBOOK METHODS--------------------------------------------------------------------------------------------
     SpellBook initialiseSpellBook(){
