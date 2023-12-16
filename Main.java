@@ -380,24 +380,28 @@ class Main extends Program{
                     }
                     input(getPlayerInput('3'),game);
                     break;
+
                 case MAP:
                     if(game.initGameState){
 
                         game.initGameState = false;
                     }
                     break;
+
                 case COMBAT:
                     if(game.initGameState){
                         
                         game.initGameState = false;
                     }
                     break;
+
                 case SHOP:
                     if(game.initGameState){
                         
                         game.initGameState = false;
                     }
                     break;
+                    
                 case SPELLIST:
                     if(game.initGameState){
                         println(toString(theBook));
