@@ -216,7 +216,7 @@ class Main extends Program{
         }
         return res;
     }
-    Sprite castSprite(Sprite targetSprite, Sprite sourceSprite, int x, int y){
+    Sprite castSpriteExp(Sprite targetSprite, Sprite sourceSprite, int x, int y){
         //casts a sourceSprite into a targetSprite, targetSprite is enlarged if it is too small for the casted sprite(sprite casted at negative coordinates will not show up)
         int widthOverflow = max((x + sourceSprite.width), targetSprite.width);
         int heightOverflow = max((y + sourceSprite.height), targetSprite.height);
