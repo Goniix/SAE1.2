@@ -26,6 +26,44 @@ class Main extends Program{
         return (numb1>numb2) ? numb1 : numb2;
     }
 
+    char getPlayerInput(char max){
+        char res;
+        do{
+            res = readChar();
+        }while(res>max || res<'1');
+        return res;
+    }
+
+    //GAMESTATE INPUTS
+    void input(char key, Game game){
+        switch(game.gameState){
+            case TITLE:
+                switch(key){
+                    case '1':
+                        break;
+                    case '2':
+                        switchGameState(GameState.SPELLIST,game);
+                        break;
+                    case '3':
+                        game.run = false;
+                        break;
+                }
+                break;
+            case SPELLIST:
+                switch(key){
+                    case '1':
+                        switchGameState(GameState.TITLE,game);
+                        break;
+                }
+                break;
+        }
+    }
+    void switchGameState(GameState state, Game game){
+        game.gameState = state;
+        game.initGameState = true;
+        clearScreen();
+    }
+
     //ABILITY METHODS--------------------------------------------------------------------------------------------
     Ability newAbility(String effect, int power, String target){
         //converts string loaded data from spellList into ability class objects
@@ -296,29 +334,30 @@ class Main extends Program{
     }
 
     void algorithm(){
-        GameState gameState = GameState.TITLE;
-        boolean initGameState = true;
-        boolean run = true;
-        boolean error = false;
+        clearScreen();
+        Game game = new Game();
 
         SpellBook theBook = initialiseSpellBook();
-        println(toString(theBook));
+
+        // println(toString(theBook));
 
         Unit playerUnit = newUnit(Target.PLAYER,"Player");
         Unit ennemyUnit = null;
 
-        println(toString(playerUnit));
-        castSpell(theBook.allSpells[5],playerUnit,ennemyUnit);
-        println(toString(playerUnit));
+
+        // println(toString(playerUnit));
+        // castSpell(theBook.allSpells[5],playerUnit,ennemyUnit);
+        // println(toString(playerUnit));
 
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
-        Sprite blankSquare = importSprite("src/blankSquare.txt");
+        //Sprite blankSquare = importSprite("src/blankSquare.txt");
         
         
 
-        int testIndex = 0;
+        // int testIndex = 0;
         hide();
-        while(run){
+        while(game.run){
+            /*
             try{
                 clearScreen();
                 print(toString(castSprite(titleScreen, blankSquare,testIndex%titleScreen.width,0)));
@@ -327,31 +366,47 @@ class Main extends Program{
             catch(InterruptedException e){
                 println(e);
             }
-            testIndex++;
+            testIndex++;*/
             
-            /*
-            switch(gameState){
+            
+            switch(game.gameState){
                 case TITLE:
-                    if(initGameState){
-
+                    if(game.initGameState){
+                        println(toString(titleScreen));
+                        println("1.Start Game");
+                        println("2.Show List of spells");
+                        println("3.Exit Game");
+                        game.initGameState = false;
                     }
+                    input(getPlayerInput('3'),game);
                     break;
                 case MAP:
-                    if(initGameState){
-                        
+                    if(game.initGameState){
+
+                        game.initGameState = false;
                     }
                     break;
                 case COMBAT:
-                    if(initGameState){
+                    if(game.initGameState){
                         
+                        game.initGameState = false;
                     }
                     break;
                 case SHOP:
-                    if(initGameState){
+                    if(game.initGameState){
                         
+                        game.initGameState = false;
                     }
                     break;
-            }*/
+                case SPELLIST:
+                    if(game.initGameState){
+                        println(toString(theBook));
+                        println("1.Go back to title");
+                        game.initGameState = false;
+                    }
+                    input(getPlayerInput('1'),game);
+                    break;
+            }
         }
         show();
     }
