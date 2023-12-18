@@ -355,7 +355,7 @@ class Main extends Program{
         
 
         // int testIndex = 0;
-        hide();
+        show();
         while(game.run){
             /*
             try{
@@ -373,6 +373,7 @@ class Main extends Program{
                 case TITLE:
                     if(game.initGameState){
                         println(toString(titleScreen));
+                        println("Choose an option");
                         println("1.Start Game");
                         println("2.Show List of spells");
                         println("3.Exit Game");
@@ -408,6 +409,5 @@ class Main extends Program{
                     break;
             }
         }
-        show();
     }
 }
