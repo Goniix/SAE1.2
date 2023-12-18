@@ -34,7 +34,17 @@ class Main extends Program{
         return res;
     }
 
-    //GAMESTATE INPUTS
+    void shuffle(int[] list){
+        int len = length(list);
+        for(int index = 0; index<len; index++){
+            int randomIndex = random()*len;
+            int temp = list[index];
+            list[index] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
+    }
+
+    //GAMESTATE INPUTS--------------------------------------------------------------------------------------------
     void input(char key, Game game){
         switch(game.gameState){
             case TITLE:
