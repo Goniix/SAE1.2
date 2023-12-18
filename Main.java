@@ -336,7 +336,6 @@ class Main extends Program{
     void algorithm(){
         clearScreen();
         Game game = new Game();
-        println("chibre");
         SpellBook theBook = initialiseSpellBook();
 
         // println(toString(theBook));
