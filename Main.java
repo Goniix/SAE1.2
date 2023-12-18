@@ -93,7 +93,7 @@ class Main extends Program{
                 targ = Target.PLAYER;
                 break;
             case "FOE":
-                targ = Target.ENNEMY;
+                targ = Target.ENEMY;
                 break; 
             default:
                 println("Error malformed target: "+target);
@@ -172,8 +172,8 @@ class Main extends Program{
             case PLAYER:
                 res="player";
                 break;
-            case ENNEMY:
-                res="ennemy";
+            case ENEMY:
+                res="enemy";
                 break;
         }
         return res;
@@ -184,7 +184,7 @@ class Main extends Program{
             case PLAYER:
                 res = player;
                 break;
-            case ENNEMY:
+            case ENEMY:
                 res = foe;
                 break;
         }
@@ -341,11 +341,11 @@ class Main extends Program{
         // println(toString(theBook));
 
         Unit playerUnit = newUnit(Target.PLAYER,"Player");
-        Unit ennemyUnit = null;
+        Unit enemyUnit = null;
 
 
         // println(toString(playerUnit));
-        // castSpell(theBook.allSpells[5],playerUnit,ennemyUnit);
+        // castSpell(theBook.allSpells[5],playerUnit,enemyUnit);
         // println(toString(playerUnit));
 
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
