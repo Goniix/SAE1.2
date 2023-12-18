@@ -1,6 +1,6 @@
 class Unit{
-    Spell[] hand;
-    Spell[] deck;
+    int[] hand;
+    int[] deck;
 
     int maxHealth;
     int health;

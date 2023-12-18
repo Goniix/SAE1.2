@@ -37,7 +37,7 @@ class Main extends Program{
     void shuffle(int[] list){
         int len = length(list);
         for(int index = 0; index<len; index++){
-            int randomIndex = random()*len;
+            int randomIndex = (int) random()*len;
             int temp = list[index];
             list[index] = list[randomIndex];
             list[randomIndex] = temp;
@@ -68,6 +68,7 @@ class Main extends Program{
                 break;
         }
     }
+
     void switchGameState(GameState state, Game game){
         game.gameState = state;
         game.initGameState = true;
@@ -85,7 +86,7 @@ class Main extends Program{
                 break;
             case "HEL":
                 type = Effect.HEAL;
-                break; 
+                break;
             case "SHD":
                 type = Effect.SHIELD;
                 break;
@@ -113,6 +114,7 @@ class Main extends Program{
         res.targetType = targ;
         return res; 
     }
+
     String toString(Ability ability){
         String res = "";
         res+= ability.power+" ";
@@ -122,6 +124,7 @@ class Main extends Program{
 
         return res;
     }
+
     void executeAbility(Ability ability, Unit targetUnit){
         int power = ability.power;
         Effect type = ability.effectType;
@@ -150,6 +153,7 @@ class Main extends Program{
         res.shield = 0;
         return res;
     }
+
     String toString(Unit unit){
         String res = ASCIILINE;
         res+= "Name: "+ unit.name +"\n";
@@ -188,6 +192,7 @@ class Main extends Program{
         }
         return res;
     }
+
     Unit targetToUnit(Target type, Unit player, Unit foe){
         Unit res = null;
         switch(type){
@@ -208,6 +213,7 @@ class Main extends Program{
         res.spellAbilities = abilities;
         return res;
     }
+
     String toString(Spell spell){
         String res = "";
         res +=spell.name+" : ";
@@ -216,6 +222,7 @@ class Main extends Program{
         }
         return res;
     }
+
     void castSpell(Spell spell,Unit player, Unit foe){
         println("-> Casted "+spell.name+" !");
         int abilityCount = length(spell.spellAbilities);
@@ -234,6 +241,7 @@ class Main extends Program{
         res.image = new String[height];
         return res;
     }
+
     Sprite importSprite(String fileName){
         File importedFile = newFile(fileName);
         int lineNumber = lineCount(fileName);
@@ -257,6 +265,7 @@ class Main extends Program{
         res.width = maxWidth;
         return res;
     }
+
     String toString(Sprite sprite){
         String res = "";
         for(int index = 0; index<sprite.height; index++){
@@ -264,6 +273,7 @@ class Main extends Program{
         }
         return res;
     }
+
     Sprite castSprite(Sprite targetSprite, Sprite sourceSprite, int x, int y){
         //casts a sourceSprite into a targetSprite
         Sprite res = newEmptySprite(targetSprite.width,targetSprite.height);
@@ -278,6 +288,7 @@ class Main extends Program{
         }
         return res;
     }
+
     Sprite castSpriteExp(Sprite targetSprite, Sprite sourceSprite, int x, int y){
         //casts a sourceSprite into a targetSprite, targetSprite is enlarged if it is too small for the casted sprite(sprite casted at negative coordinates will not show up)
         int widthOverflow = max((x + sourceSprite.width), targetSprite.width);
@@ -314,6 +325,7 @@ class Main extends Program{
         }
         return res;
     }
+
     String toString(SpellBook book){
         String res = ASCIILINE;
         res+="List of all available spells:\n";
@@ -323,6 +335,7 @@ class Main extends Program{
         res+= ASCIILINE;
         return res;
     }
+
     Ability[] importAbilities(String data){
         //parses a stringed list of abilities dumped from spellList.csv, and put them into a list 
         int abilityCount = 0;
@@ -343,6 +356,7 @@ class Main extends Program{
         return res;
     }
 
+    //MAINLOOP--------------------------------------------------------------------------------------------
     void algorithm(){
         clearScreen();
         Game game = new Game();
