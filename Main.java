@@ -351,7 +351,7 @@ class Main extends Program{
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
         //Sprite blankSquare = importSprite("src/blankSquare.txt");
         
-        
+
 
         // int testIndex = 0;
         show();
