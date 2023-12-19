@@ -37,7 +37,7 @@ class Main extends Program{
     void shuffle(int[] list){
         int len = length(list);
         for(int index = 0; index<len; index++){
-            int randomIndex = random()*len;
+            int randomIndex = (int) random()*len;
             int temp = list[index];
             list[index] = list[randomIndex];
             list[randomIndex] = temp;
