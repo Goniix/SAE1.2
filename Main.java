@@ -44,6 +44,14 @@ class Main extends Program{
         }
     }
 
+    void println(String[] list){
+        String res = "[";
+        for(int index = 0; index<length(list); index++){
+            res+=list[index]+", ";
+        }
+        println(res+"]");
+    }
+
     //GAMESTATE INPUTS--------------------------------------------------------------------------------------------
     void input(char key, Game game){
         switch(game.gameState){
@@ -162,9 +170,22 @@ class Main extends Program{
         return res;
     }
 
-    String[] importDeck(String fileName){//ICI
+    String[] importDeck(String fileName, String deckID){//ICI
     //imports deck list from file into a list of String
-        String[] res = new String[15];
+        File importedFile = newFile(fileName);
+
+        String line;
+        do{
+            line = readLine(importedFile);
+        }while(line != null && !line.equals(deckID));
+
+        int deckSize = (line!=null) ? Integer.parseInt(readLine(importedFile)) : 0;
+        String[] res = new String[deckSize];
+
+        for(int index = 0; index<deckSize; index++){
+            res[index] = readLine(importedFile);
+        }
+
         return res;
     }
 
@@ -389,6 +410,7 @@ class Main extends Program{
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
         //Sprite blankSquare = importSprite("src/blankSquare.txt");
         
+        println(importDeck("src/playerDeckList.txt","PLAYE"));
 
 
         // int testIndex = 0;
