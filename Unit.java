@@ -5,7 +5,5 @@ class Unit{
     int maxHealth;
     int health;
     int shield;
-    String name;
-    
-    Target targetType;
+    String name;    
 }

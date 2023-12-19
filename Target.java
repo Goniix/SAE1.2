@@ -1,1 +1,1 @@
-enum Target{PLAYER,ENEMY}
+enum Target{SELF,FOE}

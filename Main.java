@@ -115,11 +115,11 @@ class Main extends Program{
         
         Target targ;
         switch(target){
-            case "PLR":
-                targ = Target.PLAYER;
+            case "SLF":
+                targ = Target.SELF;
                 break;
             case "FOE":
-                targ = Target.ENEMY;
+                targ = Target.FOE;
                 break; 
             default:
                 println("Error malformed target: "+target);
@@ -159,10 +159,9 @@ class Main extends Program{
     }
 
     //UNIT METHODS--------------------------------------------------------------------------------------------
-    Unit newUnit(Target type, String name){
+    Unit newUnit(String name){
         Unit res = new Unit();
         res.name = name;
-        res.targetType = type;
         res.maxHealth = 100;
         res.health = res.maxHealth;
         res.shield = 0;
@@ -228,23 +227,23 @@ class Main extends Program{
     String toString(Target type){
         String res = "";
         switch(type){
-            case PLAYER:
-                res="player";
+            case SELF:
+                res="self";
                 break;
-            case ENEMY:
-                res="enemy";
+            case FOE:
+                res="foe";
                 break;
         }
         return res;
     }
 
-    Unit targetToUnit(Target type, Unit player, Unit foe){
+    Unit targetSwitch(Target type, Unit self, Unit foe){
         Unit res = null;
         switch(type){
-            case PLAYER:
-                res = player;
+            case SELF:
+                res = self;
                 break;
-            case ENEMY:
+            case FOE:
                 res = foe;
                 break;
         }
@@ -268,12 +267,12 @@ class Main extends Program{
         return res;
     }
 
-    void castSpell(Spell spell,Unit player, Unit foe){
+    void castSpell(Spell spell,Unit self, Unit foe){
         println("-> Casted "+spell.name+" !");
         int abilityCount = length(spell.spellAbilities);
         for(int i = 0; i<abilityCount; i++){
             Ability ability = spell.spellAbilities[i];
-            Unit targetUnit = targetToUnit(ability.targetType,player,foe);
+            Unit targetUnit = targetSwitch(ability.targetType,self,foe);
             executeAbility(ability,targetUnit);
         }
     }
@@ -418,7 +417,7 @@ class Main extends Program{
 
         // println(toString(theBook));
 
-        Unit playerUnit = newUnit(Target.PLAYER,"Player");
+        Unit playerUnit = newUnit("Player");
         Unit enemyUnit = null;
 
 
