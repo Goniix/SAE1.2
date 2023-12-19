@@ -34,7 +34,17 @@ class Main extends Program{
         return res;
     }
 
-    //GAMESTATE INPUTS
+    void shuffle(int[] list){
+        int len = length(list);
+        for(int index = 0; index<len; index++){
+            int randomIndex = random()*len;
+            int temp = list[index];
+            list[index] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
+    }
+
+    //GAMESTATE INPUTS--------------------------------------------------------------------------------------------
     void input(char key, Game game){
         switch(game.gameState){
             case TITLE:
@@ -93,7 +103,7 @@ class Main extends Program{
                 targ = Target.PLAYER;
                 break;
             case "FOE":
-                targ = Target.ENNEMY;
+                targ = Target.ENEMY;
                 break; 
             default:
                 println("Error malformed target: "+target);
@@ -172,8 +182,8 @@ class Main extends Program{
             case PLAYER:
                 res="player";
                 break;
-            case ENNEMY:
-                res="ennemy";
+            case ENEMY:
+                res="enemy";
                 break;
         }
         return res;
@@ -184,7 +194,7 @@ class Main extends Program{
             case PLAYER:
                 res = player;
                 break;
-            case ENNEMY:
+            case ENEMY:
                 res = foe;
                 break;
         }
@@ -336,26 +346,25 @@ class Main extends Program{
     void algorithm(){
         clearScreen();
         Game game = new Game();
-
         SpellBook theBook = initialiseSpellBook();
 
         // println(toString(theBook));
 
         Unit playerUnit = newUnit(Target.PLAYER,"Player");
-        Unit ennemyUnit = null;
+        Unit enemyUnit = null;
 
 
         // println(toString(playerUnit));
-        // castSpell(theBook.allSpells[5],playerUnit,ennemyUnit);
+        // castSpell(theBook.allSpells[5],playerUnit,enemyUnit);
         // println(toString(playerUnit));
 
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
         //Sprite blankSquare = importSprite("src/blankSquare.txt");
         
-        
+
 
         // int testIndex = 0;
-        hide();
+        show();
         while(game.run){
             /*
             try{
@@ -373,6 +382,7 @@ class Main extends Program{
                 case TITLE:
                     if(game.initGameState){
                         println(toString(titleScreen));
+                        println("Choose an option");
                         println("1.Start Game");
                         println("2.Show List of spells");
                         println("3.Exit Game");
@@ -412,6 +422,5 @@ class Main extends Program{
                     break;
             }
         }
-        show();
     }
 }
