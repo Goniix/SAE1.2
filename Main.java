@@ -162,6 +162,20 @@ class Main extends Program{
         return res;
     }
 
+    String[] importDeck(String fileName){//ICI
+    //imports deck list from file into a list of String
+        String[] res = new String[15];
+        return res;
+    }
+
+    int[] importSpellList(String[] stringedList){//ICI
+    //imports spell id from list of String (the list of spell indexes is stored into spellbook (must create function to parse and retrieve the indexes))
+        int stringedLen = length(stringedList);
+        int[] res = new int[stringedLen];
+        return res;
+    }
+
+
     //EFFECT METHODS--------------------------------------------------------------------------------------------
     String toString(Effect type){
         String res = "";
