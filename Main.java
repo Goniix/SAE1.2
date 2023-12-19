@@ -51,6 +51,13 @@ class Main extends Program{
         }
         println(res+"]");
     }
+    void println(int[] list){
+        String res = "[";
+        for(int index = 0; index<length(list); index++){
+            res+=list[index]+", ";
+        }
+        println(res+"]");
+    }
 
     //GAMESTATE INPUTS--------------------------------------------------------------------------------------------
     void input(char key, Game game){
@@ -189,10 +196,13 @@ class Main extends Program{
         return res;
     }
 
-    int[] importSpellList(String[] stringedList){//ICI
-    //imports spell id from list of String (the list of spell indexes is stored into spellbook (must create function to parse and retrieve the indexes))
+    int[] importSpellList(String[] stringedList, SpellBook book){
+    //imports spell id from list of String
         int stringedLen = length(stringedList);
         int[] res = new int[stringedLen];
+        for(int index = 0; index<stringedLen; index++){
+            res[index] = getSpellIndex(book,stringedList[index]);
+        }
         return res;
     }
 
@@ -391,6 +401,15 @@ class Main extends Program{
         return res;
     }
 
+    int getSpellIndex(SpellBook book, String spellName){
+        int index = 0;
+        while(index<length(book.allSpells) && !book.allSpells[index].name.equals(spellName)){
+            index++;
+        }
+        return (index==length(book.allSpells)) ? -1 : index;
+    }
+
+
     //MAINLOOP--------------------------------------------------------------------------------------------
     void algorithm(){
         clearScreen();
@@ -410,7 +429,7 @@ class Main extends Program{
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
         //Sprite blankSquare = importSprite("src/blankSquare.txt");
         
-        println(importDeck("src/playerDeckList.txt","PLAYE"));
+        //println(importSpellList(importDeck("src/playerDeckList.txt","PLAYER"),theBook));
 
 
         // int testIndex = 0;
