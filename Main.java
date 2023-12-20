@@ -3,6 +3,7 @@ import extensions.File;
 import ijava.Curses;
 class Main extends Program{
     final String ASCIILINE = "-----------------------------------------------\n";
+    final String DECK_FILE = "src/deckList.txt";
     
     //GENERAL METHODS--------------------------------------------------------------------------------------------
     int clamp(int val, int min, int max){
@@ -34,14 +35,15 @@ class Main extends Program{
         return res;
     }
 
-    void shuffle(int[] list){
+    int[] shuffle(int[] list){
         int len = length(list);
         for(int index = 0; index<len; index++){
-            int randomIndex = (int) random()*len;
+            int randomIndex = (int) (random()*len);
             int temp = list[index];
             list[index] = list[randomIndex];
             list[randomIndex] = temp;
         }
+        return list;
     }
 
     void println(String[] list){
@@ -51,12 +53,21 @@ class Main extends Program{
         }
         println(res+"]");
     }
+
     void println(int[] list){
         String res = "[";
         for(int index = 0; index<length(list); index++){
             res+=list[index]+", ";
         }
         println(res+"]");
+    }
+
+    int[] copy(int[] list){
+        int[] res = new int[length(list)];
+        for(int index = 0; index<length(list); index++){
+            res[index] = list[index];
+        }
+        return res;
     }
 
     //GAMESTATE INPUTS--------------------------------------------------------------------------------------------
@@ -165,6 +176,7 @@ class Main extends Program{
         res.maxHealth = 100;
         res.health = res.maxHealth;
         res.shield = 0;
+        res.hand = new int[] {-1,-1,-1,-1};
         return res;
     }
 
@@ -176,8 +188,8 @@ class Main extends Program{
         return res;
     }
 
-    String[] importDeck(String fileName, String deckID){//ICI
-    //imports deck list from file into a list of String
+    String[] readDeckFile(String fileName, String deckID){
+    //imports deck list from file into a list of String (named deckList)
         File importedFile = newFile(fileName);
 
         String line;
@@ -195,8 +207,8 @@ class Main extends Program{
         return res;
     }
 
-    int[] importSpellList(String[] stringedList, SpellBook book){
-    //imports spell id from list of String
+    int[] readDeckList(String[] stringedList, SpellBook book){
+    //imports spell id from list of String (deckList)
         int stringedLen = length(stringedList);
         int[] res = new int[stringedLen];
         for(int index = 0; index<stringedLen; index++){
@@ -205,6 +217,36 @@ class Main extends Program{
         return res;
     }
 
+    void importDeck(Unit unit, String deckFileName, SpellBook book){
+        unit.baseDeck = readDeckList(readDeckFile(deckFileName,unit.name),book);
+        unit.deck = copy(unit.baseDeck);
+    }
+
+    void drawACard(Unit unit, int count){
+        int index = 0;
+        while(index<length(unit.hand) && count>0){
+            int nextDeckCard = unit.deck[unit.deckIndex];
+            if (unit.hand[index] == -1){
+                unit.hand[index] = nextDeckCard;
+                count--;
+                unit.deckIndex++;
+                if(unit.deckIndex==length(unit.deck)){
+                    unit.deckIndex = 0;
+                    shuffle(unit.deck);
+                }
+            }
+            index++;
+        }
+    }
+
+    void resetDeck(Unit unit){
+        unit.deck = copy(unit.baseDeck);
+        unit.hand = new int[] {-1,-1,-1,-1};
+    }
+
+    void discardACard(Unit unit, int index){
+        unit.hand[index]=-1;
+    }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
     String toString(Effect type){
@@ -417,7 +459,7 @@ class Main extends Program{
 
         // println(toString(theBook));
 
-        Unit playerUnit = newUnit("Player");
+        Unit playerUnit = newUnit("PLAYER");
         Unit enemyUnit = null;
 
 
@@ -427,9 +469,8 @@ class Main extends Program{
 
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
         //Sprite blankSquare = importSprite("src/blankSquare.txt");
-        
-        //println(importSpellList(importDeck("src/playerDeckList.txt","PLAYER"),theBook));
 
+        importDeck(playerUnit,DECK_FILE,theBook);
 
         // int testIndex = 0;
         show();
@@ -466,7 +507,14 @@ class Main extends Program{
                     break;
                 case COMBAT:
                     if(game.initGameState){
-                        
+                        resetDeck(playerUnit);
+                        shuffle(playerUnit.deck);
+                        drawACard(playerUnit,4);
+
+                        resetDeck(enemyUnit);
+                        shuffle(enemyUnit.deck);
+                        drawACard(enemyUnit,4);
+
                         game.initGameState = false;
                     }
                     break;
