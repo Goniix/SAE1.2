@@ -477,6 +477,7 @@ class Main extends Program{
         show();
         while(game.run){
             
+            /*
             try{
                 clearScreen();
                 print(toString(castSprite(titleScreen, blankSquare,testIndex%titleScreen.width,0)));
@@ -486,8 +487,9 @@ class Main extends Program{
                 println(e);
             }
             testIndex++;
+            */
             
-            /*
+            
             switch(game.gameState){
                 case TITLE:
                     if(game.initGameState){
@@ -533,7 +535,7 @@ class Main extends Program{
                     }
                     input(getPlayerInput('1'),game);
                     break;
-            }*/
+            }
         }
     }
 }
