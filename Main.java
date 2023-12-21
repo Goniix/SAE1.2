@@ -92,6 +92,15 @@ class Main extends Program{
                         break;
                 }
                 break;
+            case COMBAT:
+                if(key>='1' && key<='4'){
+                    int handIndex = Character.getNumericValue(key)-1;  ;
+                    int spellIndex = game.playerUnit.hand[handIndex];
+                    Spell spellToCast = game.theBook.allSpells[spellIndex];
+                    castSpell(spellToCast,game.playerUnit,game.enemyUnit);
+                    //ICI======================================================================================================
+                }
+                break;
         }
     }
 
@@ -455,13 +464,10 @@ class Main extends Program{
     void algorithm(){
         clearScreen();
         Game game = new Game();
-        SpellBook theBook = initialiseSpellBook();
-
+        game.theBook = initialiseSpellBook();
+        game.playerUnit = newUnit("PLAYER");
+        game.enemyUnit = null;
         // println(toString(theBook));
-
-        Unit playerUnit = newUnit("PLAYER");
-        Unit enemyUnit = null;
-
 
         // println(toString(playerUnit));
         // castSpell(theBook.allSpells[5],playerUnit,enemyUnit);
@@ -470,8 +476,8 @@ class Main extends Program{
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
         Sprite blankSquare = importSprite("src/blankSquare.txt");
 
-        importDeck(playerUnit,DECK_FILE,theBook);
-        println(playerUnit.deck);
+        importDeck(game.playerUnit,DECK_FILE,game.theBook);
+        println(game.playerUnit.deck);
 
         int testIndex = 0;
         show();
@@ -510,16 +516,23 @@ class Main extends Program{
                     break;
                 case COMBAT:
                     if(game.initGameState){
-                        resetDeck(playerUnit);
-                        shuffle(playerUnit.deck);
-                        drawACard(playerUnit,4);
+                        resetDeck(game.playerUnit);
+                        shuffle(game.playerUnit.deck);
+                        drawACard(game.playerUnit,4);
 
-                        resetDeck(enemyUnit);
-                        shuffle(enemyUnit.deck);
-                        drawACard(enemyUnit,4);
+                        resetDeck(game.enemyUnit);
+                        shuffle(game.enemyUnit.deck);
+                        drawACard(game.enemyUnit,4);
 
                         game.initGameState = false;
                     }
+                    println("Choose a spell to cast");
+                    for(int index = 0; index<length(game.playerUnit.hand); index++){
+                        int elemIdx = game.playerUnit.hand[index];
+                        Spell elem = game.theBook.allSpells[elemIdx];
+                        println(toString(elem));
+                    }
+                    input(getPlayerInput('3'),game);
                     break;
                 case SHOP:
                     if(game.initGameState){
@@ -529,7 +542,7 @@ class Main extends Program{
                     break;
                 case SPELLIST:
                     if(game.initGameState){
-                        println(toString(theBook));
+                        println(toString(game.theBook));
                         println("1.Go back to title");
                         game.initGameState = false;
                     }
