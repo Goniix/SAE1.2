@@ -3,10 +3,10 @@ PLAYER
 Slash
 Slash
 Slash
+Slash
+Slash
 Patch
 Patch
-Patch
-Bulk
 Bulk
 Bulk
 

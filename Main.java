@@ -76,6 +76,7 @@ class Main extends Program{
             case TITLE:
                 switch(key){
                     case '1':
+                        switchGameState(GameState.COMBAT,game);
                         break;
                     case '2':
                         switchGameState(GameState.SPELLIST,game);
@@ -97,8 +98,14 @@ class Main extends Program{
                     int handIndex = Character.getNumericValue(key)-1;  ;
                     int spellIndex = game.playerUnit.hand[handIndex];
                     Spell spellToCast = game.theBook.allSpells[spellIndex];
+                    clearScreen();
                     castSpell(spellToCast,game.playerUnit,game.enemyUnit);
+                    delay(2500);
+
                     //ICI======================================================================================================
+                    //il manque la défausse des cartes utilisées
+                    //l'action du monstre
+                    //la mort du monstre et du joueur
                 }
                 break;
         }
@@ -168,12 +175,15 @@ class Main extends Program{
                 power -= targetUnit.shield;
                 targetUnit.shield -= ability.power-power;
                 targetUnit.health -= power;
+                println(targetUnit.name+" takes "+power+" damages");
                 break;
             case HEAL:
                 targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
+                println(targetUnit.name+" heals "+power+" HP");
                 break;
             case SHIELD:
                 targetUnit.shield += power;
+                println(targetUnit.name+" shields itself "+power);
                 break;
         }
     }
@@ -319,7 +329,7 @@ class Main extends Program{
     }
 
     void castSpell(Spell spell,Unit self, Unit foe){
-        println("-> Casted "+spell.name+" !");
+        println(self.name+" casted "+spell.name+" !");
         int abilityCount = length(spell.spellAbilities);
         for(int i = 0; i<abilityCount; i++){
             Ability ability = spell.spellAbilities[i];
@@ -466,7 +476,7 @@ class Main extends Program{
         Game game = new Game();
         game.theBook = initialiseSpellBook();
         game.playerUnit = newUnit("PLAYER");
-        game.enemyUnit = null;
+        game.enemyUnit = newUnit("WOLF");
         // println(toString(theBook));
 
         // println(toString(playerUnit));
@@ -477,9 +487,9 @@ class Main extends Program{
         Sprite blankSquare = importSprite("src/blankSquare.txt");
 
         importDeck(game.playerUnit,DECK_FILE,game.theBook);
-        println(game.playerUnit.deck);
+        importDeck(game.enemyUnit,DECK_FILE,game.theBook);
 
-        int testIndex = 0;
+        //int testIndex = 0;
         show();
         while(game.run){
             
@@ -520,19 +530,23 @@ class Main extends Program{
                         shuffle(game.playerUnit.deck);
                         drawACard(game.playerUnit,4);
 
+
                         resetDeck(game.enemyUnit);
                         shuffle(game.enemyUnit.deck);
                         drawACard(game.enemyUnit,4);
 
                         game.initGameState = false;
                     }
+                    clearScreen();
+                    println(toString(game.playerUnit));
+                    println(toString(game.enemyUnit));
                     println("Choose a spell to cast");
                     for(int index = 0; index<length(game.playerUnit.hand); index++){
                         int elemIdx = game.playerUnit.hand[index];
                         Spell elem = game.theBook.allSpells[elemIdx];
-                        println(toString(elem));
+                        println((index+1)+": "+toString(elem));
                     }
-                    input(getPlayerInput('3'),game);
+                    input(getPlayerInput('4'),game);
                     break;
                 case SHOP:
                     if(game.initGameState){
