@@ -468,14 +468,15 @@ class Main extends Program{
         // println(toString(playerUnit));
 
         Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
-        //Sprite blankSquare = importSprite("src/blankSquare.txt");
+        Sprite blankSquare = importSprite("src/blankSquare.txt");
 
         importDeck(playerUnit,DECK_FILE,theBook);
+        println(playerUnit.deck);
 
-        // int testIndex = 0;
+        int testIndex = 0;
         show();
         while(game.run){
-            /*
+            
             try{
                 clearScreen();
                 print(toString(castSprite(titleScreen, blankSquare,testIndex%titleScreen.width,0)));
@@ -484,9 +485,9 @@ class Main extends Program{
             catch(InterruptedException e){
                 println(e);
             }
-            testIndex++;*/
+            testIndex++;
             
-            
+            /*
             switch(game.gameState){
                 case TITLE:
                     if(game.initGameState){
@@ -532,7 +533,7 @@ class Main extends Program{
                     }
                     input(getPlayerInput('1'),game);
                     break;
-            }
+            }*/
         }
     }
 }
