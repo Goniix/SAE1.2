@@ -100,8 +100,6 @@ class Main extends Program{
                     handleUnitTurn(game.playerUnit,inputIndex,game);
 
                     //ICI======================================================================================================
-                    //rework la pioche pour qu'elle vide le deck quand effectuée
-                    //créer remakeDeck pour remélanger le deck et la discard pour en refaire un deck
                     //l'action du monstre
                     //la mort du monstre et du joueur
                 }
@@ -242,8 +240,9 @@ class Main extends Program{
 
     void drawCard(Unit unit, int count){
         for(int index = 0; index<count; index++){
-                unit.hand = append(unit.hand, unit.deck[length(unit.deck)-1]);
-                unit.deck = rebuildPile(unit.deck, length(unit.deck)-1);
+            if (length(unit.deck) == 0) remakeDeck(unit);
+            unit.hand = append(unit.hand, unit.deck[length(unit.deck)-1]);
+            unit.deck = rebuildPile(unit.deck, length(unit.deck)-1);
         }
     }
 
@@ -264,6 +263,7 @@ class Main extends Program{
         castSpell(spellToCast,game.playerUnit,game.enemyUnit);
         discardACard(game.playerUnit,inputIndex);
         game.playerUnit.hand = rebuildPile(game.playerUnit.hand,length(game.playerUnit.hand)-1);
+        drawCard(game.playerUnit,1);
         delay(2500);
     }
     
@@ -285,6 +285,16 @@ class Main extends Program{
         int[] res = rebuildPile(pile,length(pile)+1);
         res[length(pile)] = element;
         return res;
+    }
+
+    void remakeDeck(Unit unit){
+        int len = length(unit.deck)+length(unit.discard);
+        int[] res = new int[len];
+        for(int index = 0; index<len; index++){
+            if(index<length(unit.deck)) res[index] = unit.deck[index];
+            else res[index] = unit.deck[index-length(unit.deck)];
+        }
+        unit.deck = shuffle(res);
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
