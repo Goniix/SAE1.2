@@ -117,12 +117,20 @@ class Main extends Program{
             case COMBAT:
                 if(key>='1' && key<='4'){
                     clearScreen();
-                    int inputIndex = Character.getNumericValue(key)-1;  ;
+                    int inputIndex = Character.getNumericValue(key)-1;
                     handleUnitTurn(game.playerUnit,inputIndex,game);
 
                     //ICI======================================================================================================
                     //l'action du monstre
                     //la mort du monstre et du joueur
+                }
+                break;
+            case QUESTION:
+                if(key>='1' && key<='4'){
+                    int inputIndex = Character.getNumericValue(key)-1;
+                    print("chibre, ça n'a pas encore été implémenté!");
+                    switchGameState(GameState.COMBAT,game);
+                    game.initGameState = false;
                 }
                 break;
         }
@@ -569,6 +577,7 @@ class Main extends Program{
         game.playerUnit = newUnit("PLAYER");
         game.enemyUnit = newUnit("WOLF");
         game.questionList = importQuestionList("src/questions.csv");
+        game.currentQuestion = null;
         // println(toString(theBook));
 
         // println(toString(playerUnit));
@@ -647,6 +656,9 @@ class Main extends Program{
                     }
                     char handLen = (char)(length(game.playerUnit.hand)+'0');
                     input(getPlayerInput(handLen),game);
+
+                    switchGameState(GameState.QUESTION,game);
+                    
                     break;
                 case SHOP:
                     if(game.initGameState){
@@ -671,6 +683,14 @@ class Main extends Program{
                         game.initGameState = false;
                     }
                     input(getPlayerInput('1'),game);
+                    break;
+                case QUESTION:
+                    if(game.initGameState){
+                        int randomIndex = (int)(random()*length(game.questionList));
+                        game.currentQuestion = game.questionList[randomIndex];
+                        println(toString(game.currentQuestion));
+                    }
+                    input(getPlayerInput('4'),game);
                     break;
             }
         }

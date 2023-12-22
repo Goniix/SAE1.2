@@ -5,6 +5,7 @@ class Game{
     boolean error = false;
     String[] ennemyList = new String[] {"WOLF","WOLF","WOLF"};
     Question[] questionList;
+    Question currentQuestion;
     
     SpellBook theBook;
     Unit playerUnit;
