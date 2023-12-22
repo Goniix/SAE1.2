@@ -1,9 +1,9 @@
 import extensions.CSVFile;
 import extensions.File;
 import ijava.Curses;
-class Main extends Program{
+class Splask extends Program{
     final String ASCIILINE = "-----------------------------------------------";
-    final String DECK_FILE = "src/deckList.txt";
+    final String DECK_FILE = "ressources/deckList.txt";
     
     //GENERAL METHODS--------------------------------------------------------------------------------------------
     int clamp(int val, int min, int max){
@@ -128,7 +128,16 @@ class Main extends Program{
             case QUESTION:
                 if(key>='1' && key<='4'){
                     int inputIndex = Character.getNumericValue(key)-1;
-                    print("chibre, ça n'a pas encore été implémenté!");
+
+                    int randomIndex = (int)(random()*4);
+                    int spellIndex = game.enemyUnit.hand[randomIndex];
+                    Spell spellToCast = game.theBook.allSpells[spellIndex];
+                    castSpell(spellToCast, game.enemyUnit, game.playerUnit, game.enemyUnit.strength);
+                    discardACard(game.enemyUnit,randomIndex);
+                    game.enemyUnit.hand = rebuildPile(game.enemyUnit.hand,length(game.enemyUnit.hand)-1);
+                    drawCard(game.enemyUnit,1);
+                    delay(2500);
+
                     switchGameState(GameState.COMBAT,game);
                     game.initGameState = false;
                 }
@@ -192,8 +201,9 @@ class Main extends Program{
         return res;
     }
 
-    void executeAbility(Ability ability, Unit targetUnit){
-        int power = ability.power;
+    void executeAbility(Ability ability, Unit targetUnit, double multiplicator){
+        int basePower = (int) (ability.power * multiplicator);
+        int power = basePower;
         Effect type = ability.effectType;
         switch(type){
             case DAMAGE:
@@ -220,6 +230,7 @@ class Main extends Program{
         res.maxHealth = 100;
         res.health = res.maxHealth;
         res.shield = 0;
+        res.strength = 1.0;
         res.hand = new int[] {-1,-1,-1,-1};
         res.discard = new int[0];
         return res;
@@ -289,11 +300,11 @@ class Main extends Program{
     void handleUnitTurn(Unit unit, int inputIndex, Game game){
         int spellIndex = game.playerUnit.hand[inputIndex];
         Spell spellToCast = game.theBook.allSpells[spellIndex];
-        castSpell(spellToCast,game.playerUnit,game.enemyUnit);
+        castSpell(spellToCast,game.playerUnit,game.enemyUnit,game.playerUnit.strength);
         discardACard(game.playerUnit,inputIndex);
         game.playerUnit.hand = rebuildPile(game.playerUnit.hand,length(game.playerUnit.hand)-1);
         drawCard(game.playerUnit,1);
-        delay(250);
+        delay(2500);
     }
     
     int[] rebuildPile(int[] pile, int cardCount){
@@ -388,13 +399,13 @@ class Main extends Program{
         return res;
     }
 
-    void castSpell(Spell spell,Unit self, Unit foe){
+    void castSpell(Spell spell,Unit self, Unit foe, double multiplicator){
         println(self.name+" casted "+spell.name+" !");
         int abilityCount = length(spell.spellAbilities);
         for(int i = 0; i<abilityCount; i++){
             Ability ability = spell.spellAbilities[i];
             Unit targetUnit = targetSwitch(ability.targetType,self,foe);
-            executeAbility(ability,targetUnit);
+            executeAbility(ability,targetUnit,multiplicator);
         }
     }
 
@@ -520,7 +531,7 @@ class Main extends Program{
     //SPELLBOOK METHODS--------------------------------------------------------------------------------------------
     SpellBook initialiseSpellBook(){
         SpellBook res = new SpellBook();
-        CSVFile loadedSpells = loadCSV("src/spellList.csv",',');
+        CSVFile loadedSpells = loadCSV("ressources/spellList.csv",',');
         res.allSpells = new Spell[rowCount(loadedSpells)-1];
         for(int i = 0; i<rowCount(loadedSpells)-1; i++){
             String name = getCell(loadedSpells,i+1,0);
@@ -576,16 +587,12 @@ class Main extends Program{
         game.theBook = initialiseSpellBook();
         game.playerUnit = newUnit("PLAYER");
         game.enemyUnit = newUnit("WOLF");
-        game.questionList = importQuestionList("src/questions.csv");
+        game.questionList = importQuestionList("ressources/questions.csv");
         game.currentQuestion = null;
-        // println(toString(theBook));
 
-        // println(toString(playerUnit));
-        // castSpell(theBook.allSpells[5],playerUnit,enemyUnit);
-        // println(toString(playerUnit));
 
-        Sprite titleScreen = importSprite("src/spellAskerTitle.txt");
-        Sprite blankSquare = importSprite("src/blankSquare.txt");
+        Sprite titleScreen = importSprite("ressources/spellAskerTitle.txt");
+        Sprite blankSquare = importSprite("ressources/blankSquare.txt");
 
         importDeck(game.playerUnit,DECK_FILE,game.theBook);
         importDeck(game.enemyUnit,DECK_FILE,game.theBook);
@@ -642,12 +649,16 @@ class Main extends Program{
                     clearScreen();
                     println(toString(game.playerUnit));
                     println(toString(game.enemyUnit));
-                    print("Player hand: ");
-                    println(game.playerUnit.hand);
-                    print("Player deck: ");
-                    println(game.playerUnit.deck);
-                    print("Player discard: ");
-                    println(game.playerUnit.discard);
+                    if(game.debug){
+                        print("Player hand: ");
+                        println(game.playerUnit.hand);
+                        print("Player deck: ");
+                        println(game.playerUnit.deck);
+                        print("Player discard: ");
+                        println(game.playerUnit.discard);
+                    }
+
+
                     println("Choose a spell to cast");
                     for(int index = 0; index<length(game.playerUnit.hand); index++){
                         int elemIdx = game.playerUnit.hand[index];

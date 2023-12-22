@@ -1,12 +1,6 @@
-#!/bin/sh
-for entry in *
-do
-    if [ -f $entry ] && [ "${entry##*.}" = "class" ]
-    then
-        rm $entry
-    fi
-    if [ -f $entry ] && [ "${entry##*.}" = "java" ]
-    then
-        javac -cp ~/ijava/program.jar:. $entry
-    fi
-done
+#!/bin/bash
+export SOURCES=src
+export CLASSES=classes
+export CLASSPATH=`find lib -name "*.jar" | tr '\n' ':'`
+
+javac -cp ${CLASSPATH} -sourcepath ${SOURCES} -d ${CLASSES} $@ `find src -name "*.java"`

@@ -8,6 +8,7 @@ class Unit{
     int maxHealth;
     int health;
     int shield;
+    double strength;
 
     String name;    
 }
