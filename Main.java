@@ -2,7 +2,7 @@ import extensions.CSVFile;
 import extensions.File;
 import ijava.Curses;
 class Main extends Program{
-    final String ASCIILINE = "-----------------------------------------------\n";
+    final String ASCIILINE = "-----------------------------------------------";
     final String DECK_FILE = "src/deckList.txt";
     
     //GENERAL METHODS--------------------------------------------------------------------------------------------
@@ -46,6 +46,17 @@ class Main extends Program{
         return list;
     }
 
+    String[] shuffle(String[] list){
+        int len = length(list);
+        for(int index = 0; index<len; index++){
+            int randomIndex = (int) (random()*len);
+            String temp = list[index];
+            list[index] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
+        return list;
+    }
+
     void println(String[] list){
         String res = "[";
         for(int index = 0; index<length(list); index++){
@@ -82,11 +93,21 @@ class Main extends Program{
                         switchGameState(GameState.SPELLIST,game);
                         break;
                     case '3':
+                        switchGameState(GameState.QUESLIST,game);
+                        break;
+                    case '4':
                         game.run = false;
                         break;
                 }
                 break;
             case SPELLIST:
+                switch(key){
+                    case '1':
+                        switchGameState(GameState.TITLE,game);
+                        break;
+                }
+                break;
+            case QUESLIST:
                 switch(key){
                     case '1':
                         switchGameState(GameState.TITLE,game);
@@ -197,7 +218,7 @@ class Main extends Program{
     }
 
     String toString(Unit unit){
-        String res = ASCIILINE;
+        String res = ASCIILINE+"\n";
         res+= "Name: "+ unit.name +"\n";
         res+= "Health: "+ (unit.health+unit.shield) + " / " + unit.maxHealth + "\n";
         res+= ASCIILINE;
@@ -448,6 +469,45 @@ class Main extends Program{
         }
         return res;
     }
+    
+    ///QUESTION METHODS--------------------------------------------------------------------------------------------
+    Question newQuestion(String[] importedData){
+        Question res = new Question();
+        res.askLine = importedData[0];
+        res.answer = importedData[1];
+        res.answerList = new String[4];
+        for(int index = 0; index<4; index++){
+            res.answerList[index] = importedData[index+1];
+        }
+        return res;
+        
+    }
+
+    Question[] importQuestionList(String fileName){
+        CSVFile importedFile = loadCSV(fileName);
+        int questionCount = rowCount(importedFile);
+        Question[] res = new Question[questionCount];
+        for(int lineIndex = 0; lineIndex<questionCount; lineIndex++){
+            String[] line = new String[5];
+            for(int colIndex = 0; colIndex<5; colIndex++){
+                line[colIndex] = getCell(importedFile, lineIndex, colIndex);
+            }
+            res[lineIndex] = newQuestion(line);
+            shuffle(res[lineIndex].answerList);
+        }
+        return res;
+    }
+
+    String toString(Question question){
+        String res = "";
+        res+=ASCIILINE+"\n";
+        res+=question.askLine+"\n";
+        for(int index = 0; index<4; index++){
+            res+=(index+1)+": "+question.answerList[index]+"\n";
+        }
+        res+=ASCIILINE+"\n";
+        return res;
+    }
 
     //SPELLBOOK METHODS--------------------------------------------------------------------------------------------
     SpellBook initialiseSpellBook(){
@@ -508,6 +568,7 @@ class Main extends Program{
         game.theBook = initialiseSpellBook();
         game.playerUnit = newUnit("PLAYER");
         game.enemyUnit = newUnit("WOLF");
+        game.questionList = importQuestionList("src/questions.csv");
         // println(toString(theBook));
 
         // println(toString(playerUnit));
@@ -543,11 +604,12 @@ class Main extends Program{
                         println(toString(titleScreen));
                         println("Choose an option");
                         println("1.Start Game");
-                        println("2.Show List of spells");
-                        println("3.Exit Game");
+                        println("2.Show list of spells");
+                        println("3.Show list of questions");
+                        println("4.Exit Game");
                         game.initGameState = false;
                     }
-                    input(getPlayerInput('3'),game);
+                    input(getPlayerInput('4'),game);
                     break;
                 case MAP:
                     if(game.initGameState){
@@ -595,6 +657,16 @@ class Main extends Program{
                 case SPELLIST:
                     if(game.initGameState){
                         println(toString(game.theBook));
+                        println("1.Go back to title");
+                        game.initGameState = false;
+                    }
+                    input(getPlayerInput('1'),game);
+                    break;
+                case QUESLIST:
+                    if(game.initGameState){
+                        for(int index = 0; index<length(game.questionList); index++){
+                            println(toString(game.questionList[index]));
+                        }
                         println("1.Go back to title");
                         game.initGameState = false;
                     }
