@@ -29,4 +29,13 @@ class Pile{
         this.rebuild(this.length()-1);
         return res;
     }
+
+    public void shuffle(){
+        for(int index = 0; index<len; index++){
+            int randomIndex = (int) (random()*this.length());
+            int temp = this.c[index];
+            this.c[index] = this.c[randomIndex];
+            this.c[randomIndex] = temp;
+        }
+    }
 }
