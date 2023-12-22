@@ -95,15 +95,13 @@ class Main extends Program{
                 break;
             case COMBAT:
                 if(key>='1' && key<='4'){
-                    int handIndex = Character.getNumericValue(key)-1;  ;
-                    int spellIndex = game.playerUnit.hand[handIndex];
-                    Spell spellToCast = game.theBook.allSpells[spellIndex];
                     clearScreen();
-                    castSpell(spellToCast,game.playerUnit,game.enemyUnit);
-                    delay(2500);
+                    int inputIndex = Character.getNumericValue(key)-1;  ;
+                    handleUnitTurn(game.playerUnit,inputIndex,game);
 
                     //ICI======================================================================================================
-                    //il manque la défausse des cartes utilisées
+                    //rework la pioche pour qu'elle vide le deck quand effectuée
+                    //créer remakeDeck pour remélanger le deck et la discard pour en refaire un deck
                     //l'action du monstre
                     //la mort du monstre et du joueur
                 }
@@ -196,6 +194,7 @@ class Main extends Program{
         res.health = res.maxHealth;
         res.shield = 0;
         res.hand = new int[] {-1,-1,-1,-1};
+        res.discard = new int[0];
         return res;
     }
 
@@ -264,7 +263,38 @@ class Main extends Program{
     }
 
     void discardACard(Unit unit, int index){
+        //unit.discard = rebuildPile(unit.discard, length(unit.discard)+1);
+        unit.discard = append(unit.discard,unit.hand[index]);
         unit.hand[index]=-1;
+    }
+
+    void handleUnitTurn(Unit unit, int inputIndex, Game game){
+        int spellIndex = game.playerUnit.hand[inputIndex];
+        Spell spellToCast = game.theBook.allSpells[spellIndex];
+        castSpell(spellToCast,game.playerUnit,game.enemyUnit);
+        discardACard(game.playerUnit,inputIndex);
+        game.playerUnit.hand = rebuildPile(game.playerUnit.hand,length(game.playerUnit.hand)-1);
+        delay(2500);
+    }
+    
+    int[] rebuildPile(int[] pile, int cardCount){
+        int[] newPile = new int[cardCount];
+        int refIndex = 0;
+        int oldIndex = 0;
+        while(refIndex<cardCount && oldIndex<length(pile)){
+            if(pile[oldIndex] != -1){
+                newPile[refIndex] = pile[oldIndex];
+                refIndex++;
+            }
+            oldIndex++;
+        }
+        return newPile;
+    }
+
+    int[] append(int[] pile, int element){
+        int[] res = rebuildPile(pile,length(pile)+1);
+        res[length(pile)] = element;
+        return res;
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
@@ -540,13 +570,18 @@ class Main extends Program{
                     clearScreen();
                     println(toString(game.playerUnit));
                     println(toString(game.enemyUnit));
+                    print("Player hand: ");
+                    println(game.playerUnit.hand);
+                    print("Player discard: ");
+                    println(game.playerUnit.discard);
                     println("Choose a spell to cast");
                     for(int index = 0; index<length(game.playerUnit.hand); index++){
                         int elemIdx = game.playerUnit.hand[index];
                         Spell elem = game.theBook.allSpells[elemIdx];
                         println((index+1)+": "+toString(elem));
                     }
-                    input(getPlayerInput('4'),game);
+                    char handLen = (char)(length(game.playerUnit.hand)+'0');
+                    input(getPlayerInput(handLen),game);
                     break;
                 case SHOP:
                     if(game.initGameState){

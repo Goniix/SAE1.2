@@ -2,6 +2,7 @@ class Unit{
     int[] hand;
     int[] baseDeck;
     int[] deck;
+    int[] discard;
     int deckIndex;
 
     int maxHealth;
