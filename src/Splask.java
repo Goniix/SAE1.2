@@ -120,24 +120,25 @@ class Splask extends Program{
                     int inputIndex = Character.getNumericValue(key)-1;
                     handleUnitTurn(game.playerUnit,inputIndex,game);
 
-                    //ICI======================================================================================================
-                    //l'action du monstre
-                    //la mort du monstre et du joueur
                 }
                 break;
             case QUESTION:
                 if(key>='1' && key<='4'){
                     int inputIndex = Character.getNumericValue(key)-1;
+                    boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
+                    println(rightAnswer);
+                    double answerMultiplier = (rightAnswer) ? game.enemyUnit.strength - 0.4 : game.enemyUnit.strength;
 
                     int randomIndex = (int)(random()*4);
                     int spellIndex = game.enemyUnit.hand[randomIndex];
                     Spell spellToCast = game.theBook.allSpells[spellIndex];
-                    castSpell(spellToCast, game.enemyUnit, game.playerUnit, game.enemyUnit.strength);
+                    castSpell(spellToCast, game.enemyUnit, game.playerUnit, answerMultiplier);
                     discardACard(game.enemyUnit,randomIndex);
                     game.enemyUnit.hand = rebuildPile(game.enemyUnit.hand,length(game.enemyUnit.hand)-1);
                     drawCard(game.enemyUnit,1);
                     delay(2500);
 
+                    //ok c'est immonde faut nest ça dans une fonction ou reuse handleUnitTurn
                     switchGameState(GameState.COMBAT,game);
                     game.initGameState = false;
                 }
@@ -208,7 +209,7 @@ class Splask extends Program{
         switch(type){
             case DAMAGE:
                 power -= targetUnit.shield;
-                targetUnit.shield -= ability.power-power;
+                targetUnit.shield -= basePower-power;
                 targetUnit.health -= power;
                 println(targetUnit.name+" takes "+power+" damages");
                 break;
@@ -515,6 +516,10 @@ class Splask extends Program{
             shuffle(res[lineIndex].answerList);
         }
         return res;
+    }
+
+    boolean answerIsValid(Question question, int input){
+        return question.answerList[input].equals(question.answer);
     }
 
     String toString(Question question){

@@ -10,7 +10,8 @@ Des captures d'écran illustrant le fonctionnement du logiciel sont proposées d
 
 
 # Utilisation de Splask
-WIP
+Les boucles, cycles d'états du jeu et import des données fonctionnent
+La modification de deck, la détection de fin de combat et de fin de partie ne sont pas encore implémentés (le jeu ne s'arrête jamais on reste stuck dans un combat infinit)
 
 Afin d'utiliser le projet, il suffit de taper les commandes suivantes dans un terminal :
 
