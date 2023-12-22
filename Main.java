@@ -264,7 +264,7 @@ class Main extends Program{
         discardACard(game.playerUnit,inputIndex);
         game.playerUnit.hand = rebuildPile(game.playerUnit.hand,length(game.playerUnit.hand)-1);
         drawCard(game.playerUnit,1);
-        delay(2500);
+        delay(250);
     }
     
     int[] rebuildPile(int[] pile, int cardCount){
@@ -292,9 +292,10 @@ class Main extends Program{
         int[] res = new int[len];
         for(int index = 0; index<len; index++){
             if(index<length(unit.deck)) res[index] = unit.deck[index];
-            else res[index] = unit.deck[index-length(unit.deck)];
+            else res[index] = unit.discard[index-length(unit.deck)];
         }
         unit.deck = shuffle(res);
+        unit.discard = new int[0];
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
