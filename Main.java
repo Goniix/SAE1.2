@@ -240,26 +240,16 @@ class Main extends Program{
         unit.deck = copy(unit.baseDeck);
     }
 
-    void drawACard(Unit unit, int count){
-        int index = 0;
-        while(index<length(unit.hand) && count>0){
-            int nextDeckCard = unit.deck[unit.deckIndex];
-            if (unit.hand[index] == -1){
-                unit.hand[index] = nextDeckCard;
-                count--;
-                unit.deckIndex++;
-                if(unit.deckIndex==length(unit.deck)){
-                    unit.deckIndex = 0;
-                    shuffle(unit.deck);
-                }
-            }
-            index++;
+    void drawCard(Unit unit, int count){
+        for(int index = 0; index<count; index++){
+                unit.hand = append(unit.hand, unit.deck[length(unit.deck)-1]);
+                unit.deck = rebuildPile(unit.deck, length(unit.deck)-1);
         }
     }
 
     void resetDeck(Unit unit){
         unit.deck = copy(unit.baseDeck);
-        unit.hand = new int[] {-1,-1,-1,-1};
+        unit.hand = new int[0];
     }
 
     void discardACard(Unit unit, int index){
@@ -558,12 +548,12 @@ class Main extends Program{
                     if(game.initGameState){
                         resetDeck(game.playerUnit);
                         shuffle(game.playerUnit.deck);
-                        drawACard(game.playerUnit,4);
+                        drawCard(game.playerUnit,4);
 
 
                         resetDeck(game.enemyUnit);
                         shuffle(game.enemyUnit.deck);
-                        drawACard(game.enemyUnit,4);
+                        drawCard(game.enemyUnit,4);
 
                         game.initGameState = false;
                     }
@@ -572,6 +562,8 @@ class Main extends Program{
                     println(toString(game.enemyUnit));
                     print("Player hand: ");
                     println(game.playerUnit.hand);
+                    print("Player deck: ");
+                    println(game.playerUnit.deck);
                     print("Player discard: ");
                     println(game.playerUnit.discard);
                     println("Choose a spell to cast");
