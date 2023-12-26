@@ -118,7 +118,7 @@ class Splask extends Program{
                 if(key>='1' && key<='4'){
                     clearScreen();
                     int inputIndex = Character.getNumericValue(key)-1;
-                    handleUnitTurn(game.playerUnit,inputIndex,game);
+                    handleUnitTurn(game.playerUnit,game.enemyUnit,inputIndex,game.playerUnit.strength,game);
 
                 }
                 break;
@@ -126,10 +126,10 @@ class Splask extends Program{
                 if(key>='1' && key<='4'){
                     int inputIndex = Character.getNumericValue(key)-1;
                     boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
-                    println(rightAnswer);
-                    double answerMultiplier = (rightAnswer) ? game.enemyUnit.strength - 0.4 : game.enemyUnit.strength;
-
+                    double answerMultiplier = (rightAnswer) ? game.enemyUnit.strength- 0.4: game.enemyUnit.strength;
+                    
                     int randomIndex = (int)(random()*4);
+                    
                     int spellIndex = game.enemyUnit.hand[randomIndex];
                     Spell spellToCast = game.theBook.allSpells[spellIndex];
                     castSpell(spellToCast, game.enemyUnit, game.playerUnit, answerMultiplier);
@@ -208,10 +208,10 @@ class Splask extends Program{
         Effect type = ability.effectType;
         switch(type){
             case DAMAGE:
-                power -= targetUnit.shield;
+                power = max(0, power-targetUnit.shield);
                 targetUnit.shield -= basePower-power;
                 targetUnit.health -= power;
-                println(targetUnit.name+" takes "+power+" damages");
+                println(targetUnit.name+" takes "+basePower+" damages");
                 break;
             case HEAL:
                 targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
@@ -240,7 +240,9 @@ class Splask extends Program{
     String toString(Unit unit){
         String res = ASCIILINE+"\n";
         res+= "Name: "+ unit.name +"\n";
-        res+= "Health: "+ (unit.health+unit.shield) + " / " + unit.maxHealth + "\n";
+        res+= "Health: "+ unit.health;
+        if(unit.shield>0) res += " + " + unit.shield; 
+        res+= " / " + unit.maxHealth + "\n";
         res+= ASCIILINE;
         return res;
     }
@@ -298,13 +300,13 @@ class Splask extends Program{
         unit.hand[index]=-1;
     }
 
-    void handleUnitTurn(Unit unit, int inputIndex, Game game){
-        int spellIndex = game.playerUnit.hand[inputIndex];
+    void handleUnitTurn(Unit self, Unit foe, int inputIndex, double multiplier, Game game){
+        int spellIndex = self.hand[inputIndex];
         Spell spellToCast = game.theBook.allSpells[spellIndex];
-        castSpell(spellToCast,game.playerUnit,game.enemyUnit,game.playerUnit.strength);
-        discardACard(game.playerUnit,inputIndex);
-        game.playerUnit.hand = rebuildPile(game.playerUnit.hand,length(game.playerUnit.hand)-1);
-        drawCard(game.playerUnit,1);
+        castSpell(spellToCast,self,foe,multiplier);
+        discardACard(self,inputIndex);
+        self.hand = rebuildPile(self.hand,length(self.hand)-1);
+        drawCard(self,1);
         delay(2500);
     }
     
