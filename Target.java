@@ -1,1 +1,0 @@
-enum Target{PLAYER,ENEMY}
