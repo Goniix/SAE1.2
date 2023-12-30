@@ -3,7 +3,9 @@ class Game{
     boolean initGameState = true;
     boolean run = true;
     boolean error = false;
-    boolean debug = false;
+    
+    boolean debug = true;
+
     String[] ennemyList = new String[] {"WOLF","WOLF","WOLF"};
     Question[] questionList;
     Question currentQuestion;

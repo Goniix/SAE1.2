@@ -41,17 +41,6 @@ class Splask extends Program{
         return res;
     }
 
-    int[] shuffle(int[] list){
-        int len = length(list);
-        for(int index = 0; index<len; index++){
-            int randomIndex = (int) (random()*len);
-            int temp = list[index];
-            list[index] = list[randomIndex];
-            list[randomIndex] = temp;
-        }
-        return list;
-    }
-
     String[] shuffle(String[] list){
         int len = length(list);
         for(int index = 0; index<len; index++){
@@ -71,20 +60,64 @@ class Splask extends Program{
         println(res+"]");
     }
 
-    void println(int[] list){
-        String res = "[";
-        for(int index = 0; index<length(list); index++){
-            res+=list[index]+", ";
+
+    
+    //DYNAMIC PILES METHODS
+    //INT PILES
+    int[] rebuild(int[] pile, int len){
+        int[] newPile = new int[len];
+        int refIndex = 0;
+        int oldIndex = 0;
+        while(refIndex<len && oldIndex<length(pile)){
+            if(pile[oldIndex] != -1){
+                newPile[refIndex] = pile[oldIndex];
+                refIndex++;
+            }
+            oldIndex++;
         }
-        println(res+"]");
+        return newPile;
     }
 
-    int[] copy(int[] list){
-        int[] res = new int[length(list)];
-        for(int index = 0; index<length(list); index++){
-            res[index] = list[index];
+    int[] append(int[] pile, int element){
+        int[] res = rebuild(pile,length(pile)+1);
+        res[length(pile)] = element;
+        return res;
+    }
+
+    int[] remove(int[] pile, int removeIndex){
+        int[] res = new int[length(pile)-1];
+        for(int pileIndex = 0; pileIndex<length(pile)-1; pileIndex++){
+            if(pileIndex>=removeIndex) res[pileIndex] = pile[pileIndex+1];
+            else res[pileIndex] = pile[pileIndex];
         }
         return res;
+    }
+
+    int[] shuffle(int[] pile){
+        int len = length(pile);
+        for(int index = 0; index<len; index++){
+            int randomIndex = (int) (random()*len);
+            int temp = pile[index];
+            pile[index] = pile[randomIndex];
+            pile[randomIndex] = temp;
+        }
+        return pile;
+    }
+
+    int[] copy(int[] pile){
+        int[] res = new int[length(pile)];
+        for(int index = 0; index<length(pile); index++){
+            res[index] = pile[index];
+        }
+        return res;
+    }
+
+    void println(int[] pile){
+        String res = "[";
+        for(int index = 0; index<length(pile); index++){
+            res+=pile[index]+", ";
+        }
+        println(res+"]");
     }
 
     //GAMESTATE INPUTS--------------------------------------------------------------------------------------------
@@ -132,7 +165,13 @@ class Splask extends Program{
                 if(key>='1' && key<='4'){
                     int inputIndex = Character.getNumericValue(key)-1;
                     boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
-                    double answerMultiplier = (rightAnswer) ? game.enemyUnit.strength- 0.4: game.enemyUnit.strength;
+
+                    double answerMultiplier = game.enemyUnit.strength;
+                    if(rightAnswer){
+                        println("Bonne réponse! Vous subissez moins de dégats");
+                        answerMultiplier -= 0.25;
+                    } 
+                    else println("Mauvaise réponse! Vous subissez plus de dégats");
                     
                     handleUnitTurn(game.enemyUnit, game.playerUnit,game.enemyNextAttack,answerMultiplier,game);
                     /*
@@ -140,7 +179,7 @@ class Splask extends Program{
                     Spell spellToCast = game.theBook.allSpells[spellIndex];
                     castSpell(spellToCast, game.enemyUnit, game.playerUnit, answerMultiplier);
                     discardACard(game.enemyUnit,game.enemyNextAttack);
-                    game.enemyUnit.hand = rebuildPile(game.enemyUnit.hand,length(game.enemyUnit.hand)-1);
+                    game.enemyUnit.hand = rebuild(game.enemyUnit.hand,length(game.enemyUnit.hand)-1);
                     drawCard(game.enemyUnit,1);
                     delay(2500);*/
 
@@ -189,9 +228,8 @@ class Splask extends Program{
                 type = Effect.IGNITE;
                 break;
             default:
-                println("Error malformed effect: "+effect);
                 type = null;
-                break;
+                throw new RuntimeException("Effect \""+effect+"\" was not found");
         }
         res.effectType = type;
         res.power = power;
@@ -205,9 +243,8 @@ class Splask extends Program{
                 targ = Target.FOE;
                 break; 
             default:
-                println("Error malformed target: "+target);
                 targ = null;
-                break;
+                throw new RuntimeException("Target \""+target+"\" was not found");
         }
         res.targetType = targ;
         return res; 
@@ -231,11 +268,13 @@ class Splask extends Program{
         switch(type){
             case DAMAGE:
                 if(targetUnit.buffList[BUFFID_CONCUSS] != null){
+                    //is concussed
                     power *= 1.3;
                     basePower *= 1.3;
                 }
 
                 if(targetUnit.buffList[BUFFID_SHIELD] != null){
+                    //is shielded
                     power = max(0, power-targetUnit.buffList[BUFFID_SHIELD].power);
                     targetUnit.buffList[BUFFID_SHIELD].power -= basePower-power;
                 }
@@ -246,6 +285,7 @@ class Splask extends Program{
                 println(targetUnit.name+" subit "+basePower+" dégats");
 
                 if(targetUnit.buffList[BUFFID_BLEED] != null){
+                    //is bleeding
                     targetUnit.buffList[BUFFID_BLEED].power += power/3;
                     println(targetUnit.name+" saigne de plus en plus!");
                 }
@@ -377,6 +417,7 @@ class Splask extends Program{
     //imports spell id from list of String (deckList)
         int stringedLen = length(stringedList);
         int[] res = new int[stringedLen];
+        println(stringedList);
         for(int index = 0; index<stringedLen; index++){
             res[index] = getSpellIndex(book,stringedList[index]);
         }
@@ -392,12 +433,12 @@ class Splask extends Program{
         for(int index = 0; index<count; index++){
             if (length(unit.deck) == 0) remakeDeck(unit);
             unit.hand = append(unit.hand, unit.deck[length(unit.deck)-1]);
+            unit.deck = rebuild(unit.deck, length(unit.deck)-1);
             if(unit.name.equals("PLAYER")){
                 int drawedSpellIndex = unit.hand[length(unit.hand)-1];
                 String drawedSpellName = unit.gameLink.theBook.allSpells[drawedSpellIndex].name;
                 println("Vous piochez "+drawedSpellName);
             }
-            unit.deck = rebuildPile(unit.deck, length(unit.deck)-1);
         }
     }
 
@@ -407,7 +448,7 @@ class Splask extends Program{
     }
 
     void discardACard(Unit unit, int index){
-        //unit.discard = rebuildPile(unit.discard, length(unit.discard)+1);
+        //unit.discard = rebuild(unit.discard, length(unit.discard)+1);
         unit.discard = append(unit.discard,unit.hand[index]);
         unit.hand[index]=-1;
     }
@@ -417,29 +458,9 @@ class Splask extends Program{
         Spell spellToCast = game.theBook.allSpells[spellIndex];
         castSpell(spellToCast,self,foe,multiplier);
         discardACard(self,inputIndex);
-        self.hand = rebuildPile(self.hand,length(self.hand)-1);
+        self.hand = rebuild(self.hand,length(self.hand)-1);
         drawCard(self,1);
         delay(2500);
-    }
-    
-    int[] rebuildPile(int[] pile, int cardCount){
-        int[] newPile = new int[cardCount];
-        int refIndex = 0;
-        int oldIndex = 0;
-        while(refIndex<cardCount && oldIndex<length(pile)){
-            if(pile[oldIndex] != -1){
-                newPile[refIndex] = pile[oldIndex];
-                refIndex++;
-            }
-            oldIndex++;
-        }
-        return newPile;
-    }
-
-    int[] append(int[] pile, int element){
-        int[] res = rebuildPile(pile,length(pile)+1);
-        res[length(pile)] = element;
-        return res;
     }
 
     void remakeDeck(Unit unit){
@@ -487,8 +508,12 @@ class Splask extends Program{
                 }
                 if(unit.buffList[buffIndex].duration == 0) unit.buffList[buffIndex] = null;
             }
-            
         }
+    }
+
+    void inflictDamage(Unit unit, int amount){
+        // if(unit.)
+        unit.health -= amount;
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
@@ -600,9 +625,9 @@ class Splask extends Program{
 
     String toString(Spell spell){
         String res = "";
-        res +=spell.name+" : ";
+        res +=spell.name+"\n";
         for(int i = 0; i<length(spell.spellAbilities); i++){
-            res+=toString(spell.spellAbilities[i])+", ";
+            res+="  "+toString(spell.spellAbilities[i])+"\n";
         }
         return res;
     }
@@ -788,7 +813,8 @@ class Splask extends Program{
         while(index<length(book.allSpells) && !book.allSpells[index].name.equals(spellName)){
             index++;
         }
-        return (index==length(book.allSpells)) ? -1 : index;
+        if(index==length(book.allSpells)) throw new RuntimeException("Spell \""+spellName+"\" was not found");
+        return index;
     }
 
 
@@ -851,7 +877,7 @@ class Splask extends Program{
                     break;
                 case COMBAT:
                     //combat initialisation
-                    if(game.initGameState){
+                    if(game.initGameState){                        
                         resetDeck(game.playerUnit);
                         shuffle(game.playerUnit.deck);
                         drawCard(game.playerUnit,4);
@@ -885,6 +911,7 @@ class Splask extends Program{
                     println("L'adversaire s'apprête à lancer "+ enemySpellName+"\n");
 
                     //playerturn
+                    applyBuffs(game.playerUnit);
                     println("Choisissez le sort que vous aller lancer");
                     for(int index = 0; index<length(game.playerUnit.hand); index++){
                         int elemIdx = game.playerUnit.hand[index];
