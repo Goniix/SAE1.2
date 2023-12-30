@@ -4,6 +4,12 @@ import ijava.Curses;
 class Splask extends Program{
     final String ASCIILINE = "-----------------------------------------------";
     final String DECK_FILE = "ressources/deckList.txt";
+    final int BUFFID_SHIELD = 0;
+    final int BUFFID_BLEED = 1;
+    final int BUFFID_POISON = 2;
+    final int BUFFID_SHOCK = 3;
+    final int BUFFID_CONCUSS = 4;
+    final int BUFFID_IGNITE = 5;
     
     //GENERAL METHODS--------------------------------------------------------------------------------------------
     int clamp(int val, int min, int max){
@@ -227,14 +233,60 @@ class Splask extends Program{
                 targetUnit.health -= power;
                 println(targetUnit.name+" subit "+basePower+" dégats");
                 break;
+
             case HEAL:
                 targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
                 println(targetUnit.name+" se soigne de "+power+" HP");
                 break;
+
             case SHIELD:
-                targetUnit.shield += power;
+                //targetUnit.shield += power;
+                if(targetUnit.buffList[BUFFID_SHIELD] == null){
+                    targetUnit.buffList[BUFFID_SHIELD] = newBuff(1,power,type);
+                }
+                else{
+                    targetUnit.buffList[BUFFID_SHIELD].power += power;
+                }
                 println(targetUnit.name+" se protège de "+power);
                 break;
+
+            case BLEED:
+                if(targetUnit.buffList[BUFFID_BLEED] == null){
+                    targetUnit.buffList[BUFFID_BLEED] = newBuff(3,0,type);
+                    println(targetUnit.name+" se met à saigner!");
+                }
+                else{
+                    targetUnit.buffList[BUFFID_BLEED].duration += 1;
+                    println(targetUnit.name+" continue de saigner!");
+                }
+                break;
+
+            case POISON:
+                targetUnit.buffList[BUFFID_POISON] = newBuff(3,power,type);
+                println(targetUnit.name+" est empoisonné! Il perd "+(power*10)+"% de vie par tour!");
+                break;
+            
+            case SHOCK:
+                if(targetUnit.buffList[BUFFID_SHOCK] == null){
+                    targetUnit.buffList[BUFFID_SHOCK] = newBuff(2,power,type);
+                }
+                else{
+                    targetUnit.buffList[BUFFID_SHOCK].power += power;
+                }
+                println(targetUnit+" subira "+targetUnit.buffList[BUFFID_SHOCK].power+" dégats au début de son prochain tour!")
+                break;
+            
+            case CONCUSS:
+                targetUnit.buffList[BUFFID_CONCUSS] = newBuff(power,3,type);
+                println(targetUnit.name+" est étourdit! Il subit "+(power*10)+"% de dégats en plus!");
+                break;
+            
+            case IGNITE:
+                targetUnit.buffList[BUFFID_IGNITE] = newBuff(2,power,type);
+                println(targetUnit.name + " brûle! Il subira des dégats en bougeant!");
+                break;
+
+                
         }
     }
 
@@ -383,7 +435,7 @@ class Splask extends Program{
                 res="dégats de choc";
                 break;
             case CONCUSS:
-                res="tours de concussion";
+                res="tours d'étourdissement";
                 break;
             case IGNITE:
                 res="embrasement";
@@ -416,6 +468,15 @@ class Splask extends Program{
                 res = foe;
                 break;
         }
+        return res;
+    }
+
+    //BUFF METHODS--------------------------------------------------------------------------------------------
+    Buff newBuff(int duration, int power, Effect buffType){
+        Buff res = new Buff();
+        res.duration = duration;
+        res.power = power;
+        res.buffType = buffType;
         return res;
     }
 
