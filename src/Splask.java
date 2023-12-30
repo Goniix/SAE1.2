@@ -134,14 +134,15 @@ class Splask extends Program{
                     boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
                     double answerMultiplier = (rightAnswer) ? game.enemyUnit.strength- 0.4: game.enemyUnit.strength;
                     
-                    
+                    handleUnitTurn(game.enemyUnit, game.playerUnit,game.enemyNextAttack,answerMultiplier,game);
+                    /*
                     int spellIndex = game.enemyUnit.hand[game.enemyNextAttack];
                     Spell spellToCast = game.theBook.allSpells[spellIndex];
                     castSpell(spellToCast, game.enemyUnit, game.playerUnit, answerMultiplier);
                     discardACard(game.enemyUnit,game.enemyNextAttack);
                     game.enemyUnit.hand = rebuildPile(game.enemyUnit.hand,length(game.enemyUnit.hand)-1);
                     drawCard(game.enemyUnit,1);
-                    delay(2500);
+                    delay(2500);*/
 
                     //ok c'est immonde faut nest ça dans une fonction ou reuse handleUnitTurn
                     switchGameState(GameState.COMBAT,game);
