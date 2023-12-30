@@ -253,8 +253,31 @@ class Splask extends Program{
                 break;
 
             case HEAL:
-                targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
-                println(targetUnit.name+" se soigne de "+power+" HP");
+                if(targetUnit.buffList[BUFFID_IGNITE]==null){
+                    //not burning
+                    if(targetUnit.buffList[BUFFID_BLEED]!=null){
+                        //is bleeding
+                        if(targetUnit.buffList[BUFFID_BLEED].power == 0){
+                            //no damages stored in bleed
+                            targetUnit.buffList[BUFFID_BLEED] = null;
+                            println(targetUnit.name+" parvient à stopper le saignement!");
+                        }
+                        else{
+                            //some damages are stored in bleed
+                            targetUnit.buffList[BUFFID_BLEED].power = max(0,targetUnit.buffList[BUFFID_BLEED].power-power);
+                            println(targetUnit.name+" réduit le saignement de "+power+"!");
+                        }
+                        
+                    }
+                    targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
+                    println(targetUnit.name+" se soigne de "+power+" HP");
+
+                }
+                else{
+                    //is burning
+                    println(targetUnit.name+" brule! Il ne parvient pas à refermer ses plaies!");
+                }
+
                 break;
 
             case SHIELD:
@@ -300,8 +323,8 @@ class Splask extends Program{
                 break;
             
             case IGNITE:
-                targetUnit.buffList[BUFFID_IGNITE] = newBuff(2,power,type);
-                println(targetUnit.name + " brûle! Il subira des dégats en bougeant!");
+                targetUnit.buffList[BUFFID_IGNITE] = newBuff(2,0,type);
+                println(targetUnit.name + " brûle! Il ne peut plus se soigner!");
                 break;
 
                 
@@ -433,32 +456,34 @@ class Splask extends Program{
     void applyBuffs(Unit unit){
         for(int buffIndex = 0; buffIndex<length(unit.buffList); buffIndex++){
             if(unit.buffList[buffIndex]!=null){
+
                 unit.buffList[buffIndex].duration--;
 
+                Buff buff = unit.buffList[buffIndex];
                 switch(buff.buffType){
                     case BLEED:
                         if(unit.buffList[buffIndex].duration == 0){
                             unit.health-=unit.buffList[buffIndex].power;
                         }
-                        println("Ses plaies explosent, "unit.name+"subit "+buff.power+" dégats de saignement!");
+                        println("Ses plaies explosent, "+unit.name+"subit "+buff.power+" dégats de saignement!");
                         break;
 
                     case POISON:
-                        int poisonDamage = unit.health*(0.1*unit.buffList[buffIndex].power)
+                        int poisonDamage = (int)(unit.health*(0.1*unit.buffList[buffIndex].power));
                         unit.health-=poisonDamage;
-                        println(unit.name+" subit "+poisonDamage" dégats de poison!")
+                        println(unit.name+" subit "+poisonDamage+" dégats de poison!");
                         break;
                     
                     case SHOCK:
                         if(unit.buffList[buffIndex].duration == 0){
                             int shockDamage = unit.buffList[buffIndex].power;
                             unit.health-=shockDamage;
-                            println(unit.name+" subit "+shockDamage" dégats de foudroiement!")
+                            println(unit.name+" subit "+shockDamage+" dégats de foudroiement!");
                         }
                         break;
 
-                    case default: //SHIELD CONCUSS IGNITE
-                        break
+                    default: //SHIELD CONCUSS IGNITE
+                        break;
                 }
                 if(unit.buffList[buffIndex].duration == 0) unit.buffList[buffIndex] = null;
             }
