@@ -166,6 +166,21 @@ class Splask extends Program{
             case "SHD":
                 type = Effect.SHIELD;
                 break;
+            case "BLD":
+                type = Effect.BLEED;
+                break;
+            case "PSN":
+                type = Effect.POISON;
+                break;
+            case "SHK":
+                type = Effect.SHOCK;
+                break;
+            case "CNC":
+                type = Effect.CONCUSS;
+                break;
+            case "IGN":
+                type = Effect.IGNITE;
+                break;
             default:
                 println("Error malformed effect: "+effect);
                 type = null;
@@ -195,7 +210,7 @@ class Splask extends Program{
         String res = "";
         res+= ability.power+" ";
         res+= toString(ability.effectType);
-        res+=" to ";
+        res+=" à ";
         res+= toString(ability.targetType);
 
         return res;
@@ -238,8 +253,8 @@ class Splask extends Program{
 
     String toString(Unit unit){
         String res = ASCIILINE+"\n";
-        res+= "Name: "+ unit.name +"\n";
-        res+= "Health: "+ unit.health;
+        res+= "Nom: "+ unit.name +"\n";
+        res+= "Vie: "+ unit.health;
         if(unit.shield>0) res += " + " + unit.shield; 
         res+= " / " + unit.maxHealth + "\n";
         res+= ASCIILINE;
@@ -284,6 +299,11 @@ class Splask extends Program{
         for(int index = 0; index<count; index++){
             if (length(unit.deck) == 0) remakeDeck(unit);
             unit.hand = append(unit.hand, unit.deck[length(unit.deck)-1]);
+            if(unit.name.equals("PLAYER")){
+                int drawedSpellIndex = unit.hand[length(unit.hand)-1];
+                String drawedSpellName = unit.gameLink.theBook.allSpells[drawedSpellIndex].name;
+                println("Vous piochez "+drawedSpellName);
+            }
             unit.deck = rebuildPile(unit.deck, length(unit.deck)-1);
         }
     }
@@ -345,13 +365,28 @@ class Splask extends Program{
         String res = "";
         switch(type){
             case DAMAGE:
-                res="damage";
+                res="dégats";
                 break;
             case HEAL:
-                res="heal";
+                res="soins";
                 break;
             case SHIELD:
-                res="shield";
+                res="boucliers";
+                break;
+            case BLEED:
+                res="saignement";
+                break;
+            case POISON:
+                res="empoisonnement";
+                break;
+            case SHOCK:
+                res="dégats de choc";
+                break;
+            case CONCUSS:
+                res="tours de concussion";
+                break;
+            case IGNITE:
+                res="embrasement";
                 break;
         }
         return res;
@@ -362,10 +397,10 @@ class Splask extends Program{
         String res = "";
         switch(type){
             case SELF:
-                res="self";
+                res="soi même";
                 break;
             case FOE:
-                res="foe";
+                res="l'adversaire";
                 break;
         }
         return res;
@@ -402,7 +437,7 @@ class Splask extends Program{
     }
 
     void castSpell(Spell spell,Unit self, Unit foe, double multiplicator){
-        println(self.name+" casted "+spell.name+" !");
+        println(self.name+" a lancé "+spell.name+" !");
         int abilityCount = length(spell.spellAbilities);
         for(int i = 0; i<abilityCount; i++){
             Ability ability = spell.spellAbilities[i];
@@ -549,7 +584,7 @@ class Splask extends Program{
 
     String toString(SpellBook book){
         String res = ASCIILINE;
-        res+="List of all available spells:\n";
+        res+="Liste de tous les sorts éxistants:\n";
         for(int i = 0; i<length(book.allSpells); i++){
             res+=i+": "+toString(book.allSpells[i])+"\n";
         }
@@ -591,8 +626,12 @@ class Splask extends Program{
         clearScreen();
         Game game = new Game();
         game.theBook = initialiseSpellBook();
+
         game.playerUnit = newUnit("PLAYER");
         game.enemyUnit = newUnit("WOLF");
+        game.playerUnit.gameLink = game;
+        game.enemyUnit.gameLink = game;
+
         game.questionList = importQuestionList("ressources/questions.csv");
         game.currentQuestion = null;
 
@@ -672,7 +711,7 @@ class Splask extends Program{
 
                     String enemySpellName = game.theBook.allSpells[game.enemyUnit.hand[game.enemyNextAttack]].name;
 
-                    println("L'adversaiire s'apprête à lancer "+ enemySpellName);
+                    println("L'adversaire s'apprête à lancer "+ enemySpellName+"\n");
 
                     //playerturn
                     println("Choisissez le sort que vous aller lancer");

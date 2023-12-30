@@ -11,4 +11,5 @@ class Unit{
     double strength;
 
     String name;    
+    Game gameLink;
 }

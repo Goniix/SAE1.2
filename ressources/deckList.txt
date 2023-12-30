@@ -1,10 +1,10 @@
 PLAYER
 9
-Slash
-Slash
-Slash
-Slash
-Slash
+Coupe
+Coupe
+Coupe
+Coupe
+Coupe
 Patch
 Patch
 Bulk
@@ -12,8 +12,8 @@ Bulk
 
 WOLF
 5
-Scratch
-Scratch
-Scratch
-Leech
-Leech
+Griffe
+Griffe
+Griffe
+Absorbe
+Absorbe
