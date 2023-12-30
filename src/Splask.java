@@ -225,13 +225,30 @@ class Splask extends Program{
     void executeAbility(Ability ability, Unit targetUnit, double multiplicator){
         int basePower = (int) (ability.power * multiplicator);
         int power = basePower;
+
         Effect type = ability.effectType;
         switch(type){
             case DAMAGE:
-                power = max(0, power-targetUnit.shield);
-                targetUnit.shield -= basePower-power;
+                if(targetUnit.buffList[BUFFID_CONCUSS] != null){
+                    power *= 1.3;
+                    basePower *= 1.3;
+                }
+
+                if(targetUnit.buffList[BUFFID_SHIELD] != null){
+                    power = max(0, power-targetUnit.buffList[BUFFID_SHIELD].power);
+                    targetUnit.buffList[BUFFID_SHIELD].power -= basePower-power;
+                }
                 targetUnit.health -= power;
+
+                
+
                 println(targetUnit.name+" subit "+basePower+" dégats");
+
+                if(targetUnit.buffList[BUFFID_BLEED] != null){
+                    targetUnit.buffList[BUFFID_BLEED].power += power/3;
+                    println(targetUnit.name+" saigne de plus en plus!");
+                }
+
                 break;
 
             case HEAL:
@@ -273,12 +290,12 @@ class Splask extends Program{
                 else{
                     targetUnit.buffList[BUFFID_SHOCK].power += power;
                 }
-                println(targetUnit+" subira "+targetUnit.buffList[BUFFID_SHOCK].power+" dégats au début de son prochain tour!")
+                println(targetUnit+" subira "+targetUnit.buffList[BUFFID_SHOCK].power+" dégats au début de son prochain tour!");
                 break;
             
             case CONCUSS:
                 targetUnit.buffList[BUFFID_CONCUSS] = newBuff(power,3,type);
-                println(targetUnit.name+" est étourdit! Il subit "+(power*10)+"% de dégats en plus!");
+                println(targetUnit.name+" est étourdit! Il subit 30% de dégats en plus!");
                 break;
             
             case IGNITE:
@@ -307,7 +324,7 @@ class Splask extends Program{
         String res = ASCIILINE+"\n";
         res+= "Nom: "+ unit.name +"\n";
         res+= "Vie: "+ unit.health;
-        if(unit.shield>0) res += " + " + unit.shield; 
+        if(unit.buffList[BUFFID_SHIELD]!=null) res += " + " + unit.buffList[BUFFID_SHIELD].power; 
         res+= " / " + unit.maxHealth + "\n";
         res+= ASCIILINE;
         return res;
