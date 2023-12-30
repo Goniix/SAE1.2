@@ -430,6 +430,42 @@ class Splask extends Program{
         unit.discard = new int[0];
     }
 
+    void applyBuffs(Unit unit){
+        for(int buffIndex = 0; buffIndex<length(unit.buffList); buffIndex++){
+            if(unit.buffList[buffIndex]!=null){
+                unit.buffList[buffIndex].duration--;
+
+                switch(buff.buffType){
+                    case BLEED:
+                        if(unit.buffList[buffIndex].duration == 0){
+                            unit.health-=unit.buffList[buffIndex].power;
+                        }
+                        println("Ses plaies explosent, "unit.name+"subit "+buff.power+" dégats de saignement!");
+                        break;
+
+                    case POISON:
+                        int poisonDamage = unit.health*(0.1*unit.buffList[buffIndex].power)
+                        unit.health-=poisonDamage;
+                        println(unit.name+" subit "+poisonDamage" dégats de poison!")
+                        break;
+                    
+                    case SHOCK:
+                        if(unit.buffList[buffIndex].duration == 0){
+                            int shockDamage = unit.buffList[buffIndex].power;
+                            unit.health-=shockDamage;
+                            println(unit.name+" subit "+shockDamage" dégats de foudroiement!")
+                        }
+                        break;
+
+                    case default: //SHIELD CONCUSS IGNITE
+                        break
+                }
+                if(unit.buffList[buffIndex].duration == 0) unit.buffList[buffIndex] = null;
+            }
+            
+        }
+    }
+
     //EFFECT METHODS--------------------------------------------------------------------------------------------
     String toString(Effect type){
         String res = "";
