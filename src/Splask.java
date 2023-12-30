@@ -498,6 +498,37 @@ class Splask extends Program{
         return res;
     }
 
+    String toString(Buff buff){
+        String res = "";
+        res+="("+buff.duration+" tours) ";
+        switch(buff.buffType){
+            case SHIELD:
+                res+="Bouclier de résistance "+buff.power;
+                break;
+
+            case BLEED:
+                res+="Saignement de "+buff.power+" dégats";
+                break;
+
+            case POISON:
+                res+="Empoisonnement de "+(buff.power*10)+"%";
+                break;
+            
+            case SHOCK:
+                res+="Foudroiement de "+buff.power+" dégats";
+                break;
+            
+            case CONCUSS:
+                res+="Etourdissement";
+                break;
+            
+            case IGNITE:
+                res+="Embrasement de "+buff.power+" dégats";
+                break;
+        }
+        return res;
+    }
+
     //SPELL METHODS--------------------------------------------------------------------------------------------
     Spell newSpell(String name, Ability[] abilities){
         Spell res = new Spell();
