@@ -11,4 +11,5 @@ class Game{
     SpellBook theBook;
     Unit playerUnit;
     Unit enemyUnit;
+    int enemyNextAttack;
 }

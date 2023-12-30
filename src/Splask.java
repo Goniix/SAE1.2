@@ -128,12 +128,11 @@ class Splask extends Program{
                     boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
                     double answerMultiplier = (rightAnswer) ? game.enemyUnit.strength- 0.4: game.enemyUnit.strength;
                     
-                    int randomIndex = (int)(random()*4);
                     
-                    int spellIndex = game.enemyUnit.hand[randomIndex];
+                    int spellIndex = game.enemyUnit.hand[game.enemyNextAttack];
                     Spell spellToCast = game.theBook.allSpells[spellIndex];
                     castSpell(spellToCast, game.enemyUnit, game.playerUnit, answerMultiplier);
-                    discardACard(game.enemyUnit,randomIndex);
+                    discardACard(game.enemyUnit,game.enemyNextAttack);
                     game.enemyUnit.hand = rebuildPile(game.enemyUnit.hand,length(game.enemyUnit.hand)-1);
                     drawCard(game.enemyUnit,1);
                     delay(2500);
@@ -211,15 +210,15 @@ class Splask extends Program{
                 power = max(0, power-targetUnit.shield);
                 targetUnit.shield -= basePower-power;
                 targetUnit.health -= power;
-                println(targetUnit.name+" takes "+basePower+" damages");
+                println(targetUnit.name+" subit "+basePower+" dégats");
                 break;
             case HEAL:
                 targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
-                println(targetUnit.name+" heals "+power+" HP");
+                println(targetUnit.name+" se soigne de "+power+" HP");
                 break;
             case SHIELD:
                 targetUnit.shield += power;
-                println(targetUnit.name+" shields itself "+power);
+                println(targetUnit.name+" se protège de "+power);
                 break;
         }
     }
@@ -625,11 +624,11 @@ class Splask extends Program{
                 case TITLE:
                     if(game.initGameState){
                         println(toString(titleScreen));
-                        println("Choose an option");
-                        println("1.Start Game");
-                        println("2.Show list of spells");
-                        println("3.Show list of questions");
-                        println("4.Exit Game");
+                        println("Choissez une option");
+                        println("1.Lancer le jeu");
+                        println("2.Afficher la liste des sorts");
+                        println("3.Afficher la liste des questions");
+                        println("4.Quitter le jeu");
                         game.initGameState = false;
                     }
                     input(getPlayerInput('4'),game);
@@ -641,6 +640,7 @@ class Splask extends Program{
                     }
                     break;
                 case COMBAT:
+                    //combat initialisation
                     if(game.initGameState){
                         resetDeck(game.playerUnit);
                         shuffle(game.playerUnit.deck);
@@ -653,6 +653,9 @@ class Splask extends Program{
 
                         game.initGameState = false;
                     }
+
+
+                    //turn start
                     clearScreen();
                     println(toString(game.playerUnit));
                     println(toString(game.enemyUnit));
@@ -664,9 +667,15 @@ class Splask extends Program{
                         print("Player discard: ");
                         println(game.playerUnit.discard);
                     }
+                    //enemy action selection
+                    game.enemyNextAttack = (int)(random()*4);
 
+                    String enemySpellName = game.theBook.allSpells[game.enemyUnit.hand[game.enemyNextAttack]].name;
 
-                    println("Choose a spell to cast");
+                    println("L'adversaiire s'apprête à lancer "+ enemySpellName);
+
+                    //playerturn
+                    println("Choisissez le sort que vous aller lancer");
                     for(int index = 0; index<length(game.playerUnit.hand); index++){
                         int elemIdx = game.playerUnit.hand[index];
                         Spell elem = game.theBook.allSpells[elemIdx];
@@ -687,7 +696,7 @@ class Splask extends Program{
                 case SPELLIST:
                     if(game.initGameState){
                         println(toString(game.theBook));
-                        println("1.Go back to title");
+                        println("1.Retour");
                         game.initGameState = false;
                     }
                     input(getPlayerInput('1'),game);
@@ -697,7 +706,7 @@ class Splask extends Program{
                         for(int index = 0; index<length(game.questionList); index++){
                             println(toString(game.questionList[index]));
                         }
-                        println("1.Go back to title");
+                        println("1.Retour");
                         game.initGameState = false;
                     }
                     input(getPlayerInput('1'),game);
