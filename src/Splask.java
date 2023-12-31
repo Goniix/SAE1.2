@@ -229,6 +229,9 @@ class Splask extends Program{
             case "IGN":
                 type = Effect.IGNITE;
                 break;
+            case "RGN":
+                type = Effect.REGEN;
+                break;
             default:
                 type = null;
                 throw new RuntimeException("Effect \""+effect+"\" was not found");
@@ -569,7 +572,7 @@ class Splask extends Program{
             case RIGHTNESS:
                 res="exactitude";
                 break;
-                
+
         }
         return res;
     }
