@@ -526,10 +526,10 @@ class Splask extends Program{
         }
     }
 
-    void inflictDamage(Unit unit, int amount){
-        // if(unit.)
-        unit.health -= amount;
-    }
+    // void inflictDamage(Unit unit, int amount){
+    //     // if(unit.)
+    //     unit.health -= amount;
+    // }
 
     void healDamage(Unit unit, int amount){
         unit.health = clamp(unit.health+amount,0,unit.maxHealth);
@@ -563,6 +563,13 @@ class Splask extends Program{
             case IGNITE:
                 res="embrasement";
                 break;
+            case REGEN:
+                res="régénération";
+                break;
+            case RIGHTNESS:
+                res="exactitude";
+                break;
+                
         }
         return res;
     }
