@@ -10,6 +10,8 @@ class Splask extends Program{
     final int BUFFID_SHOCK = 3;
     final int BUFFID_CONCUSS = 4;
     final int BUFFID_IGNITE = 5;
+    final int BUFFID_REGEN = 6;
+    final int BUFFID_RIGHTNESS = 7;
     
     //GENERAL METHODS--------------------------------------------------------------------------------------------
     int clamp(int val, int min, int max){
@@ -309,7 +311,8 @@ class Splask extends Program{
                         }
                         
                     }
-                    targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
+                    //targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
+                    healDamage(targetUnit,power);
                     println(targetUnit.name+" se soigne de "+power+" HP");
 
                 }
@@ -365,6 +368,11 @@ class Splask extends Program{
             case IGNITE:
                 targetUnit.buffList[BUFFID_IGNITE] = newBuff(power,0,type);
                 println(targetUnit.name + " brûle! Il ne peut plus se soigner!");
+                break;
+            
+            case REGEN:
+                targetUnit.buffList[BUFFID_REGEN] = newBuff(3,power,type);
+                println(targetUnit.name + " commence à se régénérer!");
                 break;
 
                 
@@ -503,6 +511,13 @@ class Splask extends Program{
                         }
                         break;
 
+                    case REGEN:
+                        int healAmount = unit.buffList[buffIndex].power;
+                        // unit.health = clamp(unit.health+healAmount,0,unit.maxHealth)
+                        healDamage(unit,healAmount);
+                        println(unit.name+" régénère "+healAmount+" PV!");
+                        break;
+
                     default: //SHIELD CONCUSS IGNITE
                         break;
                 }
@@ -514,6 +529,10 @@ class Splask extends Program{
     void inflictDamage(Unit unit, int amount){
         // if(unit.)
         unit.health -= amount;
+    }
+
+    void healDamage(Unit unit, int amount){
+        unit.health = clamp(unit.health+amount,0,unit.maxHealth);
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------

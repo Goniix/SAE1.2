@@ -13,6 +13,6 @@ class Unit{
     String name;    
     Game gameLink;
 
-    Buff[] buffList = new Buff[6];
+    Buff[] buffList = new Buff[8];
 
 }
