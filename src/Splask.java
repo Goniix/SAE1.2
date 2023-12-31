@@ -333,7 +333,7 @@ class Splask extends Program{
 
             case BLEED:
                 if(targetUnit.buffList[BUFFID_BLEED] == null){
-                    targetUnit.buffList[BUFFID_BLEED] = newBuff(3,0,type);
+                    targetUnit.buffList[BUFFID_BLEED] = newBuff(power,0,type);
                     println(targetUnit.name+" se met à saigner!");
                 }
                 else{
@@ -363,7 +363,7 @@ class Splask extends Program{
                 break;
             
             case IGNITE:
-                targetUnit.buffList[BUFFID_IGNITE] = newBuff(2,0,type);
+                targetUnit.buffList[BUFFID_IGNITE] = newBuff(power,0,type);
                 println(targetUnit.name + " brûle! Il ne peut plus se soigner!");
                 break;
 
