@@ -171,7 +171,8 @@ class Splask extends Program{
                     double answerMultiplier = game.enemyUnit.strength;
                     if(rightAnswer){
                         println("Bonne réponse! Vous subissez moins de dégats");
-                        answerMultiplier -= 0.25;
+                        //answerMultiplier -= 0.25;
+                        game.playerUnit.buffList[BUFFID_RIGHTNESS] = newBuff(1,0,Effect.RIGHTNESS);
                     } 
                     else println("Mauvaise réponse! Vous subissez plus de dégats");
                     
@@ -276,6 +277,10 @@ class Splask extends Program{
                     //is concussed
                     power *= 1.3;
                     basePower *= 1.3;
+                }
+                if(targetUnit.buffList[BUFFID_RIGHTNESS] != null){
+                    power *= 0.7;
+                    basePower *= 0.7;
                 }
 
                 if(targetUnit.buffList[BUFFID_SHIELD] != null){
@@ -386,7 +391,7 @@ class Splask extends Program{
     Unit newUnit(String name){
         Unit res = new Unit();
         res.name = name;
-        res.maxHealth = 100;
+        res.maxHealth = 20;
         res.health = res.maxHealth;
         res.shield = 0;
         res.strength = 1.0;
@@ -492,6 +497,7 @@ class Splask extends Program{
                 unit.buffList[buffIndex].duration--;
 
                 Buff buff = unit.buffList[buffIndex];
+                final int buffPower = unit.buffList[buffIndex].power;
                 switch(buff.buffType){
                     case BLEED:
                         if(unit.buffList[buffIndex].duration == 0){
@@ -521,11 +527,15 @@ class Splask extends Program{
                         println(unit.name+" régénère "+healAmount+" PV!");
                         break;
 
-                    default: //SHIELD CONCUSS IGNITE
+                    case SHIELD:
+                        if(unit.buffList[buffIndex].power == 0) unit.buffList[buffIndex] = null;
+                        break;
+
+                    default: //CONCUSS IGNITE
                         break;
                 }
-                if(unit.buffList[buffIndex].duration == 0) unit.buffList[buffIndex] = null;
             }
+            if(unit.buffList[buffIndex] != null) if(unit.buffList[buffIndex].duration == 0) unit.buffList[buffIndex] = null;
         }
     }
 
