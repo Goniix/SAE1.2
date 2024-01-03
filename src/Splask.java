@@ -4,6 +4,14 @@ import ijava.Curses;
 class Splask extends Program{
     final String ASCIILINE = "-----------------------------------------------";
     final String DECK_FILE = "ressources/deckList.txt";
+    final int BUFFID_SHIELD = 0;
+    final int BUFFID_BLEED = 1;
+    final int BUFFID_POISON = 2;
+    final int BUFFID_SHOCK = 3;
+    final int BUFFID_CONCUSS = 4;
+    final int BUFFID_IGNITE = 5;
+    final int BUFFID_REGEN = 6;
+    final int BUFFID_RIGHTNESS = 7;
     
     //GENERAL METHODS--------------------------------------------------------------------------------------------
     int clamp(int val, int min, int max){
@@ -35,17 +43,6 @@ class Splask extends Program{
         return res;
     }
 
-    int[] shuffle(int[] list){
-        int len = length(list);
-        for(int index = 0; index<len; index++){
-            int randomIndex = (int) (random()*len);
-            int temp = list[index];
-            list[index] = list[randomIndex];
-            list[randomIndex] = temp;
-        }
-        return list;
-    }
-
     String[] shuffle(String[] list){
         int len = length(list);
         for(int index = 0; index<len; index++){
@@ -65,20 +62,72 @@ class Splask extends Program{
         println(res+"]");
     }
 
-    void println(int[] list){
-        String res = "[";
-        for(int index = 0; index<length(list); index++){
-            res+=list[index]+", ";
+
+    
+    //DYNAMIC PILES METHODS
+    //INT PILES
+    int[] rebuild(int[] pile, int len){
+        int[] newPile = new int[len];
+        int refIndex = 0;
+        int oldIndex = 0;
+        while(refIndex<len && oldIndex<length(pile)){
+            if(pile[oldIndex] != -1){
+                newPile[refIndex] = pile[oldIndex];
+                refIndex++;
+            }
+            oldIndex++;
         }
-        println(res+"]");
+        return newPile;
     }
 
-    int[] copy(int[] list){
-        int[] res = new int[length(list)];
-        for(int index = 0; index<length(list); index++){
-            res[index] = list[index];
+    int[] append(int[] pile, int element){
+        int[] res = rebuild(pile,length(pile)+1);
+        res[length(pile)] = element;
+        return res;
+    }
+
+    int[] append(int[] pile, int[] element){
+        int[] res = rebuild(pile,length(pile)+length(element));
+        for(int index = length(pile); index<length(pile)+length(element); index++){
+            res[index] = element[index-length(pile)];
         }
         return res;
+    }
+
+    int[] remove(int[] pile, int removeIndex){
+        int[] res = new int[length(pile)-1];
+        for(int pileIndex = 0; pileIndex<length(pile)-1; pileIndex++){
+            if(pileIndex>=removeIndex) res[pileIndex] = pile[pileIndex+1];
+            else res[pileIndex] = pile[pileIndex];
+        }
+        return res;
+    }
+
+    int[] shuffle(int[] pile){
+        int len = length(pile);
+        for(int index = 0; index<len; index++){
+            int randomIndex = (int) (random()*len);
+            int temp = pile[index];
+            pile[index] = pile[randomIndex];
+            pile[randomIndex] = temp;
+        }
+        return pile;
+    }
+
+    int[] copy(int[] pile){
+        int[] res = new int[length(pile)];
+        for(int index = 0; index<length(pile); index++){
+            res[index] = pile[index];
+        }
+        return res;
+    }
+
+    void println(int[] pile){
+        String res = "[";
+        for(int index = 0; index<length(pile); index++){
+            res+=pile[index]+", ";
+        }
+        println(res+"]");
     }
 
     //GAMESTATE INPUTS--------------------------------------------------------------------------------------------
@@ -124,20 +173,20 @@ class Splask extends Program{
                 break;
             case QUESTION:
                 if(key>='1' && key<='4'){
+                    clearScreen();
                     int inputIndex = Character.getNumericValue(key)-1;
                     boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
-                    double answerMultiplier = (rightAnswer) ? game.enemyUnit.strength- 0.4: game.enemyUnit.strength;
-                    
-                    
-                    int spellIndex = game.enemyUnit.hand[game.enemyNextAttack];
-                    Spell spellToCast = game.theBook.allSpells[spellIndex];
-                    castSpell(spellToCast, game.enemyUnit, game.playerUnit, answerMultiplier);
-                    discardACard(game.enemyUnit,game.enemyNextAttack);
-                    game.enemyUnit.hand = rebuildPile(game.enemyUnit.hand,length(game.enemyUnit.hand)-1);
-                    drawCard(game.enemyUnit,1);
-                    delay(2500);
 
-                    //ok c'est immonde faut nest ça dans une fonction ou reuse handleUnitTurn
+                    double answerMultiplier = game.enemyUnit.strength;
+                    if(rightAnswer){
+                        println("Bonne réponse! Vous subissez moins de dégats");
+                        //answerMultiplier -= 0.25;
+                        game.playerUnit.buffList[BUFFID_RIGHTNESS] = newBuff(1,0,Effect.RIGHTNESS);
+                    } 
+                    else println("Mauvaise réponse! Vous subissez plus de dégats");
+                    
+                    handleUnitTurn(game.enemyUnit, game.playerUnit,game.enemyNextAttack,answerMultiplier,game);
+
                     switchGameState(GameState.COMBAT,game);
                     game.initGameState = false;
                 }
@@ -181,10 +230,12 @@ class Splask extends Program{
             case "IGN":
                 type = Effect.IGNITE;
                 break;
-            default:
-                println("Error malformed effect: "+effect);
-                type = null;
+            case "RGN":
+                type = Effect.REGEN;
                 break;
+            default:
+                type = null;
+                throw new RuntimeException("Effect \""+effect+"\" was not found");
         }
         res.effectType = type;
         res.power = power;
@@ -198,9 +249,8 @@ class Splask extends Program{
                 targ = Target.FOE;
                 break; 
             default:
-                println("Error malformed target: "+target);
                 targ = null;
-                break;
+                throw new RuntimeException("Target \""+target+"\" was not found");
         }
         res.targetType = targ;
         return res; 
@@ -219,22 +269,120 @@ class Splask extends Program{
     void executeAbility(Ability ability, Unit targetUnit, double multiplicator){
         int basePower = (int) (ability.power * multiplicator);
         int power = basePower;
+
         Effect type = ability.effectType;
         switch(type){
             case DAMAGE:
-                power = max(0, power-targetUnit.shield);
-                targetUnit.shield -= basePower-power;
+                if(targetUnit.buffList[BUFFID_CONCUSS] != null){
+                    //is concussed
+                    power *= 1.3;
+                    basePower *= 1.3;
+                }
+                if(targetUnit.buffList[BUFFID_RIGHTNESS] != null){
+                    power *= 0.7;
+                    basePower *= 0.7;
+                }
+
+                if(targetUnit.buffList[BUFFID_SHIELD] != null){
+                    //is shielded
+                    power = max(0, power-targetUnit.buffList[BUFFID_SHIELD].power);
+                    targetUnit.buffList[BUFFID_SHIELD].power -= basePower-power;
+                }
                 targetUnit.health -= power;
+
+                
+
                 println(targetUnit.name+" subit "+basePower+" dégats");
+
+                if(targetUnit.buffList[BUFFID_BLEED] != null){
+                    //is bleeding
+                    targetUnit.buffList[BUFFID_BLEED].power += power/3;
+                    println(targetUnit.name+" saigne de plus en plus!");
+                }
+
                 break;
+
             case HEAL:
-                targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
-                println(targetUnit.name+" se soigne de "+power+" HP");
+                if(targetUnit.buffList[BUFFID_IGNITE]==null){
+                    //not burning
+                    if(targetUnit.buffList[BUFFID_BLEED]!=null){
+                        //is bleeding
+                        if(targetUnit.buffList[BUFFID_BLEED].power == 0){
+                            //no damages stored in bleed
+                            targetUnit.buffList[BUFFID_BLEED] = null;
+                            println(targetUnit.name+" parvient à stopper le saignement!");
+                        }
+                        else{
+                            //some damages are stored in bleed
+                            targetUnit.buffList[BUFFID_BLEED].power = max(0,targetUnit.buffList[BUFFID_BLEED].power-power);
+                            println(targetUnit.name+" réduit le saignement de "+power+"!");
+                        }
+                        
+                    }
+                    //targetUnit.health = clamp(targetUnit.health+power,0,targetUnit.maxHealth);
+                    healDamage(targetUnit,power);
+                    println(targetUnit.name+" se soigne de "+power+" HP");
+
+                }
+                else{
+                    //is burning
+                    println(targetUnit.name+" brule! Il ne parvient pas à refermer ses plaies!");
+                }
+
                 break;
+
             case SHIELD:
-                targetUnit.shield += power;
+                if(targetUnit.buffList[BUFFID_SHIELD] == null){
+                    targetUnit.buffList[BUFFID_SHIELD] = newBuff(1,power,type);
+                }
+                else{
+                    targetUnit.buffList[BUFFID_SHIELD].power += power;
+                }
                 println(targetUnit.name+" se protège de "+power);
                 break;
+
+            case BLEED:
+                if(targetUnit.buffList[BUFFID_BLEED] == null){
+                    targetUnit.buffList[BUFFID_BLEED] = newBuff(power,0,type);
+                    println(targetUnit.name+" se met à saigner!");
+                }
+                else{
+                    targetUnit.buffList[BUFFID_BLEED].duration += 1;
+                    println(targetUnit.name+" continue de saigner!");
+                }
+                break;
+
+            case POISON:
+                targetUnit.buffList[BUFFID_POISON] = newBuff(3,power,type);
+                println(targetUnit.name+" est empoisonné! Il perd "+(power*10)+"% de vie par tour!");
+                break;
+            
+            case SHOCK:
+                if(targetUnit.buffList[BUFFID_SHOCK] == null){
+                    targetUnit.buffList[BUFFID_SHOCK] = newBuff(2,power,type);
+                }
+                else{
+                    targetUnit.buffList[BUFFID_SHOCK].power += power;
+                }
+                println(targetUnit+" subira "+targetUnit.buffList[BUFFID_SHOCK].power+" dégats au début de son prochain tour!");
+                break;
+            
+            case CONCUSS:
+                targetUnit.buffList[BUFFID_CONCUSS] = newBuff(power,3,type);
+                println(targetUnit.name+" est étourdit! Il subit 30% de dégats en plus!");
+                break;
+            
+            case IGNITE:
+                targetUnit.buffList[BUFFID_IGNITE] = newBuff(power,0,type);
+                println(targetUnit.name + " brûle! Il ne peut plus se soigner!");
+                break;
+            
+            case REGEN:
+                targetUnit.buffList[BUFFID_REGEN] = newBuff(3,power,type);
+                println(targetUnit.name + " commence à se régénérer!");
+                break;
+
+                
         }
     }
 
@@ -242,7 +390,7 @@ class Splask extends Program{
     Unit newUnit(String name){
         Unit res = new Unit();
         res.name = name;
-        res.maxHealth = 100;
+        res.maxHealth = 20;
         res.health = res.maxHealth;
         res.shield = 0;
         res.strength = 1.0;
@@ -255,7 +403,7 @@ class Splask extends Program{
         String res = ASCIILINE+"\n";
         res+= "Nom: "+ unit.name +"\n";
         res+= "Vie: "+ unit.health;
-        if(unit.shield>0) res += " + " + unit.shield; 
+        if(unit.buffList[BUFFID_SHIELD]!=null) res += " + " + unit.buffList[BUFFID_SHIELD].power; 
         res+= " / " + unit.maxHealth + "\n";
         res+= ASCIILINE;
         return res;
@@ -284,6 +432,7 @@ class Splask extends Program{
     //imports spell id from list of String (deckList)
         int stringedLen = length(stringedList);
         int[] res = new int[stringedLen];
+        println(stringedList);
         for(int index = 0; index<stringedLen; index++){
             res[index] = getSpellIndex(book,stringedList[index]);
         }
@@ -299,12 +448,13 @@ class Splask extends Program{
         for(int index = 0; index<count; index++){
             if (length(unit.deck) == 0) remakeDeck(unit);
             unit.hand = append(unit.hand, unit.deck[length(unit.deck)-1]);
-            if(unit.name.equals("PLAYER")){
-                int drawedSpellIndex = unit.hand[length(unit.hand)-1];
-                String drawedSpellName = unit.gameLink.theBook.allSpells[drawedSpellIndex].name;
-                println("Vous piochez "+drawedSpellName);
-            }
-            unit.deck = rebuildPile(unit.deck, length(unit.deck)-1);
+            unit.deck = rebuild(unit.deck, length(unit.deck)-1);
+
+            //if(unit.name.equals("PLAYER")){
+            int drawedSpellIndex = unit.hand[length(unit.hand)-1];
+            String drawedSpellName = unit.gameLink.theBook.allSpells[drawedSpellIndex].name;
+            println(unit.name+" pioche "+drawedSpellName);
+            // }
         }
     }
 
@@ -313,40 +463,22 @@ class Splask extends Program{
         unit.hand = new int[0];
     }
 
-    void discardACard(Unit unit, int index){
-        //unit.discard = rebuildPile(unit.discard, length(unit.discard)+1);
-        unit.discard = append(unit.discard,unit.hand[index]);
-        unit.hand[index]=-1;
-    }
+    // void discardACard(Unit unit, int index){
+    //     //unit.discard = rebuild(unit.discard, length(unit.discard)+1);
+    //     unit.discard = append(unit.discard,unit.hand[index]);
+    //     unit.hand[index]=-1;
+    // }
 
     void handleUnitTurn(Unit self, Unit foe, int inputIndex, double multiplier, Game game){
         int spellIndex = self.hand[inputIndex];
         Spell spellToCast = game.theBook.allSpells[spellIndex];
         castSpell(spellToCast,self,foe,multiplier);
-        discardACard(self,inputIndex);
-        self.hand = rebuildPile(self.hand,length(self.hand)-1);
+        //discardACard(self,inputIndex);
+        self.discard = append(self.discard,spellIndex);
+        self.hand = remove(self.hand,inputIndex);
+        // self.hand = rebuild(self.hand,length(self.hand)-1);
         drawCard(self,1);
         delay(2500);
-    }
-    
-    int[] rebuildPile(int[] pile, int cardCount){
-        int[] newPile = new int[cardCount];
-        int refIndex = 0;
-        int oldIndex = 0;
-        while(refIndex<cardCount && oldIndex<length(pile)){
-            if(pile[oldIndex] != -1){
-                newPile[refIndex] = pile[oldIndex];
-                refIndex++;
-            }
-            oldIndex++;
-        }
-        return newPile;
-    }
-
-    int[] append(int[] pile, int element){
-        int[] res = rebuildPile(pile,length(pile)+1);
-        res[length(pile)] = element;
-        return res;
     }
 
     void remakeDeck(Unit unit){
@@ -358,6 +490,59 @@ class Splask extends Program{
         }
         unit.deck = shuffle(res);
         unit.discard = new int[0];
+    }
+
+    void applyBuffs(Unit unit){
+        for(int buffIndex = 0; buffIndex<length(unit.buffList); buffIndex++){
+            if(unit.buffList[buffIndex]!=null){
+
+                final Buff buff = unit.buffList[buffIndex];
+                final int buffPower = unit.buffList[buffIndex].power;
+
+                buff.duration--;
+
+                switch(buff.buffType){
+                    case BLEED:
+                        if(unit.buffList[buffIndex].duration == 0){
+                            unit.health-=buffPower;
+                        }
+                        println("Ses plaies explosent, "+unit.name+"subit "+buff.power+" dégats de saignement!");
+                        break;
+
+                    case POISON:
+                        int poisonDamage = (int)(unit.health*(0.1*buffPower));
+                        unit.health-=poisonDamage;
+                        println(unit.name+" subit "+poisonDamage+" dégats de poison!");
+                        break;
+                    
+                    case SHOCK:
+                        if(unit.buffList[buffIndex].duration == 0){
+                            int shockDamage = buffPower;
+                            unit.health-=shockDamage;
+                            println(unit.name+" subit "+shockDamage+" dégats de foudroiement!");
+                        }
+                        break;
+
+                    case REGEN:
+                        int healAmount = buffPower;
+                        healDamage(unit,healAmount);
+                        println(unit.name+" régénère "+healAmount+" PV!");
+                        break;
+
+                    case SHIELD:
+                        if(buffPower == 0) unit.buffList[buffIndex] = null;
+                        break;
+
+                    default: //CONCUSS IGNITE
+                        break;
+                }
+            }
+            if(unit.buffList[buffIndex] != null) if(unit.buffList[buffIndex].duration == 0) unit.buffList[buffIndex] = null;
+        }
+    }
+
+    void healDamage(Unit unit, int amount){
+        unit.health = clamp(unit.health+amount,0,unit.maxHealth);
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
@@ -383,11 +568,18 @@ class Splask extends Program{
                 res="dégats de choc";
                 break;
             case CONCUSS:
-                res="tours de concussion";
+                res="tours d'étourdissement";
                 break;
             case IGNITE:
                 res="embrasement";
                 break;
+            case REGEN:
+                res="régénération";
+                break;
+            case RIGHTNESS:
+                res="exactitude";
+                break;
+
         }
         return res;
     }
@@ -419,6 +611,46 @@ class Splask extends Program{
         return res;
     }
 
+    //BUFF METHODS--------------------------------------------------------------------------------------------
+    Buff newBuff(int duration, int power, Effect buffType){
+        Buff res = new Buff();
+        res.duration = duration;
+        res.power = power;
+        res.buffType = buffType;
+        return res;
+    }
+
+    String toString(Buff buff){
+        String res = "";
+        res+="("+buff.duration+" tours) ";
+        switch(buff.buffType){
+            case SHIELD:
+                res+="Bouclier de résistance "+buff.power;
+                break;
+
+            case BLEED:
+                res+="Saignement de "+buff.power+" dégats";
+                break;
+
+            case POISON:
+                res+="Empoisonnement de "+(buff.power*10)+"%";
+                break;
+            
+            case SHOCK:
+                res+="Foudroiement de "+buff.power+" dégats";
+                break;
+            
+            case CONCUSS:
+                res+="Etourdissement";
+                break;
+            
+            case IGNITE:
+                res+="Embrasement de "+buff.power+" dégats";
+                break;
+        }
+        return res;
+    }
+
     //SPELL METHODS--------------------------------------------------------------------------------------------
     Spell newSpell(String name, Ability[] abilities){
         Spell res = new Spell();
@@ -429,9 +661,9 @@ class Splask extends Program{
 
     String toString(Spell spell){
         String res = "";
-        res +=spell.name+" : ";
+        res +=spell.name+"\n";
         for(int i = 0; i<length(spell.spellAbilities); i++){
-            res+=toString(spell.spellAbilities[i])+", ";
+            res+="  "+toString(spell.spellAbilities[i])+"\n";
         }
         return res;
     }
@@ -617,7 +849,8 @@ class Splask extends Program{
         while(index<length(book.allSpells) && !book.allSpells[index].name.equals(spellName)){
             index++;
         }
-        return (index==length(book.allSpells)) ? -1 : index;
+        if(index==length(book.allSpells)) throw new RuntimeException("Spell \""+spellName+"\" was not found");
+        return index;
     }
 
 
@@ -680,7 +913,7 @@ class Splask extends Program{
                     break;
                 case COMBAT:
                     //combat initialisation
-                    if(game.initGameState){
+                    if(game.initGameState){                        
                         resetDeck(game.playerUnit);
                         shuffle(game.playerUnit.deck);
                         drawCard(game.playerUnit,4);
@@ -696,8 +929,12 @@ class Splask extends Program{
 
                     //turn start
                     clearScreen();
+
+                    applyBuffs(game.playerUnit);
+
                     println(toString(game.playerUnit));
                     println(toString(game.enemyUnit));
+
                     if(game.debug){
                         print("Player hand: ");
                         println(game.playerUnit.hand);
@@ -714,6 +951,7 @@ class Splask extends Program{
                     println("L'adversaire s'apprête à lancer "+ enemySpellName+"\n");
 
                     //playerturn
+                    
                     println("Choisissez le sort que vous aller lancer");
                     for(int index = 0; index<length(game.playerUnit.hand); index++){
                         int elemIdx = game.playerUnit.hand[index];

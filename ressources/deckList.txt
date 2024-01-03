@@ -1,19 +1,17 @@
 PLAYER
-9
-Coupe
-Coupe
-Coupe
-Coupe
-Coupe
-Patch
-Patch
-Bulk
-Bulk
+5
+Frappe
+Frappe
+Frappe
+Soin
+Bulk up
 
 WOLF
-5
+7
 Griffe
 Griffe
 Griffe
-Absorbe
+Griffe
+Griffe
+Griffe
 Absorbe
