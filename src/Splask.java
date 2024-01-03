@@ -165,6 +165,7 @@ class Splask extends Program{
                 break;
             case QUESTION:
                 if(key>='1' && key<='4'){
+                    clearScreen();
                     int inputIndex = Character.getNumericValue(key)-1;
                     boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
 
@@ -494,41 +495,42 @@ class Splask extends Program{
         for(int buffIndex = 0; buffIndex<length(unit.buffList); buffIndex++){
             if(unit.buffList[buffIndex]!=null){
 
-                unit.buffList[buffIndex].duration--;
-
-                Buff buff = unit.buffList[buffIndex];
+                final Buff buff = unit.buffList[buffIndex];
                 final int buffPower = unit.buffList[buffIndex].power;
+
+                buff.duration--;
+
                 switch(buff.buffType){
                     case BLEED:
                         if(unit.buffList[buffIndex].duration == 0){
-                            unit.health-=unit.buffList[buffIndex].power;
+                            unit.health-=buffPower;
                         }
                         println("Ses plaies explosent, "+unit.name+"subit "+buff.power+" dégats de saignement!");
                         break;
 
                     case POISON:
-                        int poisonDamage = (int)(unit.health*(0.1*unit.buffList[buffIndex].power));
+                        int poisonDamage = (int)(unit.health*(0.1*buffPower));
                         unit.health-=poisonDamage;
                         println(unit.name+" subit "+poisonDamage+" dégats de poison!");
                         break;
                     
                     case SHOCK:
                         if(unit.buffList[buffIndex].duration == 0){
-                            int shockDamage = unit.buffList[buffIndex].power;
+                            int shockDamage = buffPower;
                             unit.health-=shockDamage;
                             println(unit.name+" subit "+shockDamage+" dégats de foudroiement!");
                         }
                         break;
 
                     case REGEN:
-                        int healAmount = unit.buffList[buffIndex].power;
+                        int healAmount = buffPower;
                         // unit.health = clamp(unit.health+healAmount,0,unit.maxHealth)
                         healDamage(unit,healAmount);
                         println(unit.name+" régénère "+healAmount+" PV!");
                         break;
 
                     case SHIELD:
-                        if(unit.buffList[buffIndex].power == 0) unit.buffList[buffIndex] = null;
+                        if(buffPower == 0) unit.buffList[buffIndex] = null;
                         break;
 
                     default: //CONCUSS IGNITE
@@ -932,8 +934,12 @@ class Splask extends Program{
 
                     //turn start
                     clearScreen();
+
+                    applyBuffs(game.playerUnit);
+
                     println(toString(game.playerUnit));
                     println(toString(game.enemyUnit));
+
                     if(game.debug){
                         print("Player hand: ");
                         println(game.playerUnit.hand);
@@ -950,7 +956,7 @@ class Splask extends Program{
                     println("L'adversaire s'apprête à lancer "+ enemySpellName+"\n");
 
                     //playerturn
-                    applyBuffs(game.playerUnit);
+                    
                     println("Choisissez le sort que vous aller lancer");
                     for(int index = 0; index<length(game.playerUnit.hand); index++){
                         int elemIdx = game.playerUnit.hand[index];
