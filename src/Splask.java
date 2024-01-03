@@ -86,6 +86,14 @@ class Splask extends Program{
         return res;
     }
 
+    int[] append(int[] pile, int[] element){
+        int[] res = rebuild(pile,length(pile)+length(element));
+        for(int index = length(pile); index<length(pile)+length(element); index++){
+            res[index] = element[index-length(pile)];
+        }
+        return res;
+    }
+
     int[] remove(int[] pile, int removeIndex){
         int[] res = new int[length(pile)-1];
         for(int pileIndex = 0; pileIndex<length(pile)-1; pileIndex++){
@@ -178,16 +186,7 @@ class Splask extends Program{
                     else println("Mauvaise réponse! Vous subissez plus de dégats");
                     
                     handleUnitTurn(game.enemyUnit, game.playerUnit,game.enemyNextAttack,answerMultiplier,game);
-                    /*
-                    int spellIndex = game.enemyUnit.hand[game.enemyNextAttack];
-                    Spell spellToCast = game.theBook.allSpells[spellIndex];
-                    castSpell(spellToCast, game.enemyUnit, game.playerUnit, answerMultiplier);
-                    discardACard(game.enemyUnit,game.enemyNextAttack);
-                    game.enemyUnit.hand = rebuild(game.enemyUnit.hand,length(game.enemyUnit.hand)-1);
-                    drawCard(game.enemyUnit,1);
-                    delay(2500);*/
 
-                    //ok c'est immonde faut nest ça dans une fonction ou reuse handleUnitTurn
                     switchGameState(GameState.COMBAT,game);
                     game.initGameState = false;
                 }
@@ -333,7 +332,6 @@ class Splask extends Program{
                 break;
 
             case SHIELD:
-                //targetUnit.shield += power;
                 if(targetUnit.buffList[BUFFID_SHIELD] == null){
                     targetUnit.buffList[BUFFID_SHIELD] = newBuff(1,power,type);
                 }
@@ -451,11 +449,12 @@ class Splask extends Program{
             if (length(unit.deck) == 0) remakeDeck(unit);
             unit.hand = append(unit.hand, unit.deck[length(unit.deck)-1]);
             unit.deck = rebuild(unit.deck, length(unit.deck)-1);
-            if(unit.name.equals("PLAYER")){
-                int drawedSpellIndex = unit.hand[length(unit.hand)-1];
-                String drawedSpellName = unit.gameLink.theBook.allSpells[drawedSpellIndex].name;
-                println("Vous piochez "+drawedSpellName);
-            }
+
+            //if(unit.name.equals("PLAYER")){
+            int drawedSpellIndex = unit.hand[length(unit.hand)-1];
+            String drawedSpellName = unit.gameLink.theBook.allSpells[drawedSpellIndex].name;
+            println(unit.name+" pioche "+drawedSpellName);
+            // }
         }
     }
 
@@ -464,18 +463,20 @@ class Splask extends Program{
         unit.hand = new int[0];
     }
 
-    void discardACard(Unit unit, int index){
-        //unit.discard = rebuild(unit.discard, length(unit.discard)+1);
-        unit.discard = append(unit.discard,unit.hand[index]);
-        unit.hand[index]=-1;
-    }
+    // void discardACard(Unit unit, int index){
+    //     //unit.discard = rebuild(unit.discard, length(unit.discard)+1);
+    //     unit.discard = append(unit.discard,unit.hand[index]);
+    //     unit.hand[index]=-1;
+    // }
 
     void handleUnitTurn(Unit self, Unit foe, int inputIndex, double multiplier, Game game){
         int spellIndex = self.hand[inputIndex];
         Spell spellToCast = game.theBook.allSpells[spellIndex];
         castSpell(spellToCast,self,foe,multiplier);
-        discardACard(self,inputIndex);
-        self.hand = rebuild(self.hand,length(self.hand)-1);
+        //discardACard(self,inputIndex);
+        self.discard = append(self.discard,spellIndex);
+        self.hand = remove(self.hand,inputIndex);
+        // self.hand = rebuild(self.hand,length(self.hand)-1);
         drawCard(self,1);
         delay(2500);
     }
@@ -524,7 +525,6 @@ class Splask extends Program{
 
                     case REGEN:
                         int healAmount = buffPower;
-                        // unit.health = clamp(unit.health+healAmount,0,unit.maxHealth)
                         healDamage(unit,healAmount);
                         println(unit.name+" régénère "+healAmount+" PV!");
                         break;
@@ -540,11 +540,6 @@ class Splask extends Program{
             if(unit.buffList[buffIndex] != null) if(unit.buffList[buffIndex].duration == 0) unit.buffList[buffIndex] = null;
         }
     }
-
-    // void inflictDamage(Unit unit, int amount){
-    //     // if(unit.)
-    //     unit.health -= amount;
-    // }
 
     void healDamage(Unit unit, int amount){
         unit.health = clamp(unit.health+amount,0,unit.maxHealth);
