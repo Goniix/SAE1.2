@@ -4,6 +4,7 @@ import ijava.Curses;
 class Splask extends Program{
     final String ASCIILINE = "-----------------------------------------------";
     final String DECK_FILE = "ressources/deckList.txt";
+    final String MONTERS_STATS = "ressources/monsterStats.csv"
     final int BUFFID_SHIELD = 0;
     final int BUFFID_BLEED = 1;
     final int BUFFID_POISON = 2;
@@ -544,6 +545,11 @@ class Splask extends Program{
 
     void healDamage(Unit unit, int amount){
         unit.health = clamp(unit.health+amount,0,unit.maxHealth);
+    }
+
+    void importStats(Unit unit, String deckID, String fileName){
+        CSVFile import = loadCSV(fileName,',');
+
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
