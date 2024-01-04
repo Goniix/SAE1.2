@@ -1,5 +1,4 @@
 PLAYER
-5
 Frappe
 Frappe
 Frappe
@@ -7,7 +6,6 @@ Soin
 Bulk up
 
 WOLF
-7
 Griffe
 Griffe
 Griffe

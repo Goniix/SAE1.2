@@ -418,7 +418,8 @@ class Splask extends Program{
             line = readLine(importedFile);
         }while(line != null && !line.equals(deckID));
 
-        int deckSize = (line!=null) ? Integer.parseInt(readLine(importedFile)) : 0;
+        // int deckSize = (line!=null) ? Integer.parseInt(readLine(importedFile)) : 0;
+        int deckSize = (line!=null) ? getDeckSpellCount(fileName, deckID) : 0;
         String[] res = new String[deckSize];
 
         for(int index = 0; index<deckSize; index++){
@@ -851,6 +852,24 @@ class Splask extends Program{
         }
         if(index==length(book.allSpells)) throw new RuntimeException("Spell \""+spellName+"\" was not found");
         return index;
+    }
+
+    int getDeckSpellCount(String fileName, String deckID){
+        File importedFile = newFile(fileName);
+        int res = -1;
+
+        String line;
+        do{
+            line = readLine(importedFile);
+        }while(line != null && !line.equals(deckID));
+
+        do{
+            line = readLine(importedFile);
+            res++;
+        }
+        while(line != null && !line.equals(""));
+        
+        return res;
     }
 
 
