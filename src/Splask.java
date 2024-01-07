@@ -4,7 +4,7 @@ import ijava.Curses;
 class Splask extends Program{
     final String ASCIILINE = "-----------------------------------------------";
     final String DECK_FILE = "ressources/deckList.txt";
-    final String MONTERS_STATS = "ressources/monsterStats.csv"
+    final String MONTERS_STATS = "ressources/monsterStats.csv";
     final int BUFFID_SHIELD = 0;
     final int BUFFID_BLEED = 1;
     final int BUFFID_POISON = 2;
@@ -547,9 +547,23 @@ class Splask extends Program{
         unit.health = clamp(unit.health+amount,0,unit.maxHealth);
     }
 
-    void importStats(Unit unit, String deckID, String fileName){
-        CSVFile import = loadCSV(fileName,',');
+    void importStats(Unit unit, String fileName){
+        CSVFile statFile = loadCSV(fileName,',');
 
+        String deckID = unit.name;
+        int index = 0;
+        String rowID;
+        do{
+            rowID = getCell(statFile,index,0);
+            index++;
+        }
+        while(index<rowCount(statFile) && !rowID.equals(deckID));
+
+        if(index>=rowCount(statFile)) throw new RuntimeException("DeckID \""+deckID+"\" was not found");
+
+        unit.maxHealth = Integer.parseInt(getCell(statFile,index-1,1));
+        unit.health = unit.maxHealth;
+        unit.strength = Double.parseDouble(getCell(statFile,index-1,2));
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
@@ -899,6 +913,8 @@ class Splask extends Program{
 
         importDeck(game.playerUnit,DECK_FILE,game.theBook);
         importDeck(game.enemyUnit,DECK_FILE,game.theBook);
+        importStats(game.playerUnit,MONTERS_STATS);
+        importStats(game.enemyUnit,MONTERS_STATS);
 
         //int testIndex = 0;
         show();
