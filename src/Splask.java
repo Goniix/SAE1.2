@@ -5,6 +5,16 @@ class Splask extends Program{
     final String ASCIILINE = "-----------------------------------------------";
     final String DECK_FILE = "ressources/deckList.txt";
     final String MONTERS_STATS = "ressources/monsterStats.csv";
+    /*
+    final String[] = new String [] {"DOG","WOLF","GHOST","TOXIC_WRAITH","SKULL","DOOR_SKULL","WRAITH","ZOMBIE",15,1.
+BB_DRAGON,16,1
+LICH,20,1.
+WEREWOLF,12,1.
+GOOE,27,1.
+DRAGON,20,1.
+DRAGON_SEER,18,1.
+DRAGON_LORD,35,1.}
+    */
     final int BUFFID_SHIELD = 0;
     final int BUFFID_BLEED = 1;
     final int BUFFID_POISON = 2;
@@ -169,6 +179,11 @@ class Splask extends Program{
                     clearScreen();
                     int inputIndex = Character.getNumericValue(key)-1;
                     handleUnitTurn(game.playerUnit,game.enemyUnit,inputIndex,game.playerUnit.strength,game);
+                    if(!isAlive(game.playerUnit)) game.run = false;
+                    if(!isAlive(game.enemyUnit)){
+                        //game.enemyUnit = newUnit();
+                        switchGameState(GameState.SHOP,game);
+                    }
 
                 }
                 break;
@@ -181,15 +196,25 @@ class Splask extends Program{
                     double answerMultiplier = game.enemyUnit.strength;
                     if(rightAnswer){
                         println("Bonne réponse! Vous subissez moins de dégats");
-                        //answerMultiplier -= 0.25;
                         game.playerUnit.buffList[BUFFID_RIGHTNESS] = newBuff(1,0,Effect.RIGHTNESS);
                     } 
                     else println("Mauvaise réponse! Vous subissez plus de dégats");
-                    
-                    handleUnitTurn(game.enemyUnit, game.playerUnit,game.enemyNextAttack,answerMultiplier,game);
+
+                    applyBuffs(game.enemyUnit);                    
+                    handleUnitTurn(game.enemyUnit, game.playerUnit,game.enemyNextAttack, answerMultiplier,game);
 
                     switchGameState(GameState.COMBAT,game);
                     game.initGameState = false;
+                }
+                break;
+            case SHOP:
+                if(key>='1' && key<='4'){
+                    int inputIndex = Character.getNumericValue(key)-1;
+                    int selectedSpellIndex = game.shopList[inputIndex];
+                    Spell selectedSpell = game.theBook.allSpells[selectedSpellIndex];
+                    println("Vous ajoutez "+ selectedSpell.name+" à votre deck!");
+                    game.playerUnit.baseDeck = append(game.playerUnit.baseDeck,selectedSpellIndex);
+                    switchGameState(GameState.COMBAT,game);
                 }
                 break;
         }
@@ -463,13 +488,8 @@ class Splask extends Program{
     void resetDeck(Unit unit){
         unit.deck = copy(unit.baseDeck);
         unit.hand = new int[0];
+        unit.discard = new int[0];
     }
-
-    // void discardACard(Unit unit, int index){
-    //     //unit.discard = rebuild(unit.discard, length(unit.discard)+1);
-    //     unit.discard = append(unit.discard,unit.hand[index]);
-    //     unit.hand[index]=-1;
-    // }
 
     void handleUnitTurn(Unit self, Unit foe, int inputIndex, double multiplier, Game game){
         int spellIndex = self.hand[inputIndex];
@@ -564,6 +584,10 @@ class Splask extends Program{
         unit.maxHealth = Integer.parseInt(getCell(statFile,index-1,1));
         unit.health = unit.maxHealth;
         unit.strength = Double.parseDouble(getCell(statFile,index-1,2));
+    }
+
+    boolean isAlive(Unit unit){
+        return unit.health>0;
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
@@ -1002,14 +1026,23 @@ class Splask extends Program{
                     char handLen = (char)(length(game.playerUnit.hand)+'0');
                     input(getPlayerInput(handLen),game);
 
-                    switchGameState(GameState.QUESTION,game);
+                    if(game.gameState != GameState.SHOP) switchGameState(GameState.QUESTION,game);
                     
                     break;
                 case SHOP:
                     if(game.initGameState){
-                        
+                        println("Choose a card to add to your deck:");
+                        int spellCount = length(game.theBook.allSpells);
+                        int[] selectedSpells = new int[4];
+                        for(int i = 0; i<4; i++){
+                            int randomSpell = (int)(random()*(spellCount/2))+1;
+                            selectedSpells[i] = randomSpell;
+                            println(toString(game.theBook.allSpells[randomSpell]));
+                        }
+                        game.shopList = selectedSpells;
                         game.initGameState = false;
                     }
+                    input(getPlayerInput('4'),game);
                     break;
                 case SPELLIST:
                     if(game.initGameState){
@@ -1039,5 +1072,7 @@ class Splask extends Program{
                     break;
             }
         }
+        clearScreen();
+        println("GameOver! vous avez perdu.");
     }
 }

@@ -9,6 +9,8 @@ class Game{
     String[] ennemyList = new String[] {"WOLF","WOLF","WOLF"};
     Question[] questionList;
     Question currentQuestion;
+
+    int[] shopList;
     
     SpellBook theBook;
     Unit playerUnit;

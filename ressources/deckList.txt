@@ -31,3 +31,24 @@ Frappe
 
 TOXIC_WRAITH
 Poigne
+Poigne
+Souffle Caustique
+Souffle Caustique
+Frappe
+Frappe
+Frappe
+
+SKULL
+Coup de fémur
+Coup de fémur
+Coup de fémur
+Coup de fémur
+Coup de fémur II
+Gourdin
+
+DOOR_SKULL
+TOC TOC TOC
+Pied dans la porte
+Pied dans la porte
+Pied dans la porte
+Pied dans la porte
