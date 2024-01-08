@@ -5,11 +5,29 @@ Frappe
 Soin
 Bulk up
 
+DOG
+Griffe
+Griffe
+Griffe
+Griffe
+
 WOLF
-Griffe
-Griffe
+Griffe II
+Griffe II
 Griffe
 Griffe
 Griffe
 Griffe
 Absorbe
+
+GHOST
+Poigne
+Poigne
+Frappe
+Frappe
+Frappe
+Frappe
+Frappe
+
+TOXIC_WRAITH
+Poigne
