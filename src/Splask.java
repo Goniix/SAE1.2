@@ -5,16 +5,9 @@ class Splask extends Program{
     final String ASCIILINE = "-----------------------------------------------";
     final String DECK_FILE = "ressources/deckList.txt";
     final String MONTERS_STATS = "ressources/monsterStats.csv";
-    /*
-    final String[] = new String [] {"DOG","WOLF","GHOST","TOXIC_WRAITH","SKULL","DOOR_SKULL","WRAITH","ZOMBIE",15,1.
-BB_DRAGON,16,1
-LICH,20,1.
-WEREWOLF,12,1.
-GOOE,27,1.
-DRAGON,20,1.
-DRAGON_SEER,18,1.
-DRAGON_LORD,35,1.}
-    */
+
+    final String[] MONSTER_NAMES_LIST = new String [] {"DOG","WOLF","GHOST","TOXIC_WRAITH","SKULL","DOOR_SKULL","WRAITH","ZOMBIE","BB_DRAGON","LICH","WEREWOLF","GOOE","DRAGON","DRAGON_SEER","DRAGON_LORD"};
+
     final int BUFFID_SHIELD = 0;
     final int BUFFID_BLEED = 1;
     final int BUFFID_POISON = 2;
@@ -181,7 +174,8 @@ DRAGON_LORD,35,1.}
                     handleUnitTurn(game.playerUnit,game.enemyUnit,inputIndex,game.playerUnit.strength,game);
                     if(!isAlive(game.playerUnit)) game.run = false;
                     if(!isAlive(game.enemyUnit)){
-                        //game.enemyUnit = newUnit();
+                        String nextOpponentName = MONSTER_NAMES_LIST[(int)(random()*length(MONSTER_NAMES_LIST))];
+                        game.enemyUnit = newUnit(nextOpponentName);
                         switchGameState(GameState.SHOP,game);
                     }
 
@@ -208,13 +202,19 @@ DRAGON_LORD,35,1.}
                 }
                 break;
             case SHOP:
-                if(key>='1' && key<='4'){
+                if(key>='1' && key<='3'){
                     int inputIndex = Character.getNumericValue(key)-1;
                     int selectedSpellIndex = game.shopList[inputIndex];
                     Spell selectedSpell = game.theBook.allSpells[selectedSpellIndex];
                     println("Vous ajoutez "+ selectedSpell.name+" à votre deck!");
                     game.playerUnit.baseDeck = append(game.playerUnit.baseDeck,selectedSpellIndex);
                     switchGameState(GameState.COMBAT,game);
+                }
+                else if(key == '4'){
+                    int healAmount = game.playerUnit / 4;
+                    healDamage(game.playerUnit,healAmount);
+                    println("Vous vous soignez de "+healAmount+" PV");
+                    //ICI finir les actions du shop, créer le système de gestion du nombre d'actions restantes du shop, ajouter une variable level aux sorts
                 }
                 break;
         }
@@ -1031,18 +1031,26 @@ DRAGON_LORD,35,1.}
                     break;
                 case SHOP:
                     if(game.initGameState){
-                        println("Choose a card to add to your deck:");
+                        println("Vous arrivez à un camp! Que souhaitez vous faire? (vous pouvez réaliser 2 actions):");
+                        println("-------Apprendre de nouveaux sorts (1 parmis ceux là):-------");
                         int spellCount = length(game.theBook.allSpells);
-                        int[] selectedSpells = new int[4];
-                        for(int i = 0; i<4; i++){
-                            int randomSpell = (int)(random()*(spellCount/2))+1;
+                        final int shopSize = 3;
+                        int[] selectedSpells = new int[shopSize];
+                        for(int i = 0; i<shopSize; i++){
+                            int randomSpell = (int)(random()*(spellCount/2));
                             selectedSpells[i] = randomSpell;
-                            println(toString(game.theBook.allSpells[randomSpell]));
+                            println((i+1)+": "+toString(game.theBook.allSpells[randomSpell]));
                         }
+                        println("-------Panser vos plaies:-------");
+                        println("4: Vous soigner de 25% de vos PV max");
+                        println("-------Vous préparer:-------");
+                        println("5: Améliorer un sort de votre deck");
+                        println("-------Méditer:-------");
+                        println("6: Oublier 1 sort de votre deck");
                         game.shopList = selectedSpells;
                         game.initGameState = false;
                     }
-                    input(getPlayerInput('4'),game);
+                    input(getPlayerInput('6'),game);
                     break;
                 case SPELLIST:
                     if(game.initGameState){
