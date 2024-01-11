@@ -40,9 +40,13 @@ class Splask extends Program{
     }
 
     char getPlayerInput(char max){
+        String input;
         char res;
-        do{
-            res = readChar();
+        do{ 
+            do{
+                input=readString();
+            }while(length(input)>1 || length(input)==0);
+            res = input.charAt(0);
         }while(res>max || res<'1');
         return res;
     }
@@ -211,7 +215,7 @@ class Splask extends Program{
                     switchGameState(GameState.COMBAT,game);
                 }
                 else if(key == '4'){
-                    int healAmount = game.playerUnit / 4;
+                    int healAmount = game.playerUnit.maxHealth / 4;
                     healDamage(game.playerUnit,healAmount);
                     println("Vous vous soignez de "+healAmount+" PV");
                     //ICI finir les actions du shop, créer le système de gestion du nombre d'actions restantes du shop, ajouter une variable level aux sorts
@@ -1037,16 +1041,19 @@ class Splask extends Program{
                         final int shopSize = 3;
                         int[] selectedSpells = new int[shopSize];
                         for(int i = 0; i<shopSize; i++){
-                            int randomSpell = (int)(random()*(spellCount/2));
+                            int randomSpell = (int)(random()*(spellCount/2))*2;
                             selectedSpells[i] = randomSpell;
                             println((i+1)+": "+toString(game.theBook.allSpells[randomSpell]));
                         }
                         println("-------Panser vos plaies:-------");
                         println("4: Vous soigner de 25% de vos PV max");
+                        println();
                         println("-------Vous préparer:-------");
                         println("5: Améliorer un sort de votre deck");
+                        println();
                         println("-------Méditer:-------");
                         println("6: Oublier 1 sort de votre deck");
+                        println();
                         game.shopList = selectedSpells;
                         game.initGameState = false;
                     }
