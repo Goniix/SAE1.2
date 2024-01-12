@@ -5,16 +5,9 @@ class Splask extends Program{
     final String ASCIILINE = "-----------------------------------------------";
     final String DECK_FILE = "ressources/deckList.txt";
     final String MONTERS_STATS = "ressources/monsterStats.csv";
-    /*
-    final String[] = new String [] {"DOG","WOLF","GHOST","TOXIC_WRAITH","SKULL","DOOR_SKULL","WRAITH","ZOMBIE",15,1.
-BB_DRAGON,16,1
-LICH,20,1.
-WEREWOLF,12,1.
-GOOE,27,1.
-DRAGON,20,1.
-DRAGON_SEER,18,1.
-DRAGON_LORD,35,1.}
-    */
+
+    final String[] MONSTER_NAMES_LIST = new String [] {"DOG","WOLF","GHOST","GOOE","TOXIC_WRAITH","SKULL","DOOR_SKULL","WRAITH","ZOMBIE","BB_DRAGON","LICH","WEREWOLF","DRAGON","DRAGON_SEER","DRAGON_LORD"};
+
     final int BUFFID_SHIELD = 0;
     final int BUFFID_BLEED = 1;
     final int BUFFID_POISON = 2;
@@ -46,11 +39,27 @@ DRAGON_LORD,35,1.}
         return (numb1>numb2) ? numb1 : numb2;
     }
 
-    char getPlayerInput(char max){
-        char res;
+    boolean isStringNumeric(String chain){
+        boolean res = true;
+        int index = 0;
+        while(index<length(chain) && res){
+            char elem = chain.charAt(index);
+            if(elem<'0' || elem>'9') res = false;
+            index++;
+        }
+        return res;
+    }
+
+    int getPlayerInput(int max){
+        String input;
+        String stringedMax = max + "";
+        int res;
         do{
-            res = readChar();
-        }while(res>max || res<'1');
+            do{
+                input=readString();
+            }while(length(input)>length(stringedMax) || length(input)==0 || !isStringNumeric(input));
+            res = Integer.parseInt(input);
+        }while(res>max || res<1);
         return res;
     }
 
@@ -142,80 +151,138 @@ DRAGON_LORD,35,1.}
     }
 
     //GAMESTATE INPUTS--------------------------------------------------------------------------------------------
-    void input(char key, Game game){
+    void input(int key, Game game){
+        int inputIndex = key-1;
+        Spell choosenSpell;
+        int spellIndex;
         switch(game.gameState){
             case TITLE:
                 switch(key){
-                    case '1':
+                    case 1:
                         switchGameState(GameState.COMBAT,game);
                         break;
-                    case '2':
+                    case 2:
                         switchGameState(GameState.SPELLIST,game);
                         break;
-                    case '3':
+                    case 3:
                         switchGameState(GameState.QUESLIST,game);
                         break;
-                    case '4':
+                    case 4:
                         game.run = false;
                         break;
                 }
                 break;
             case SPELLIST:
                 switch(key){
-                    case '1':
+                    case 1:
                         switchGameState(GameState.TITLE,game);
                         break;
                 }
                 break;
             case QUESLIST:
                 switch(key){
-                    case '1':
+                    case 1:
                         switchGameState(GameState.TITLE,game);
                         break;
                 }
                 break;
             case COMBAT:
-                if(key>='1' && key<='4'){
+                //if(key>='1' && key<='4'){
                     clearScreen();
-                    int inputIndex = Character.getNumericValue(key)-1;
                     handleUnitTurn(game.playerUnit,game.enemyUnit,inputIndex,game.playerUnit.strength,game);
-                    if(!isAlive(game.playerUnit)) game.run = false;
-                    if(!isAlive(game.enemyUnit)){
-                        //game.enemyUnit = newUnit();
-                        switchGameState(GameState.SHOP,game);
-                    }
+                    if(!isAlive(game.playerUnit)) handlePlayerDeath(game);
+                    if(!isAlive(game.enemyUnit)) handleEnemyDeath(game);
+                    // {
+                    //     game.level++;
+                    //     String nextOpponentName = MONSTER_NAMES_LIST[game.level];
+                    //     game.enemyUnit = newUnit(nextOpponentName);
+                    //     game.enemyUnit.gameLink = game;
+                    //     importDeck(game.enemyUnit,DECK_FILE,game.theBook);
+                    //     importStats(game.enemyUnit,MONTERS_STATS);
+                    //     switchGameState(GameState.SHOP,game);
+                    //     game.shopActions = 2;
+                    // }
 
-                }
+                //}
                 break;
             case QUESTION:
-                if(key>='1' && key<='4'){
-                    clearScreen();
-                    int inputIndex = Character.getNumericValue(key)-1;
-                    boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
+                
+                clearScreen();
+                boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
 
-                    double answerMultiplier = game.enemyUnit.strength;
-                    if(rightAnswer){
-                        println("Bonne réponse! Vous subissez moins de dégats");
-                        game.playerUnit.buffList[BUFFID_RIGHTNESS] = newBuff(1,0,Effect.RIGHTNESS);
-                    } 
-                    else println("Mauvaise réponse! Vous subissez plus de dégats");
+                double answerMultiplier = game.enemyUnit.strength;
+                if(rightAnswer){
+                    println("Bonne réponse! Vous subissez moins de dégats");
+                    game.playerUnit.buffList[BUFFID_RIGHTNESS] = newBuff(1,0,Effect.RIGHTNESS);
+                } 
+                else println("Mauvaise réponse! Vous subissez plus de dégats");
 
-                    applyBuffs(game.enemyUnit);                    
+                applyBuffs(game.enemyUnit);
+                if(isAlive(game.enemyUnit)){
                     handleUnitTurn(game.enemyUnit, game.playerUnit,game.enemyNextAttack, answerMultiplier,game);
 
                     switchGameState(GameState.COMBAT,game);
                     game.initGameState = false;
                 }
+                else{
+                    handleEnemyDeath(game);
+                }                
                 break;
             case SHOP:
-                if(key>='1' && key<='4'){
-                    int inputIndex = Character.getNumericValue(key)-1;
+                if(key>=1 && key<=3){
                     int selectedSpellIndex = game.shopList[inputIndex];
                     Spell selectedSpell = game.theBook.allSpells[selectedSpellIndex];
                     println("Vous ajoutez "+ selectedSpell.name+" à votre deck!");
                     game.playerUnit.baseDeck = append(game.playerUnit.baseDeck,selectedSpellIndex);
-                    switchGameState(GameState.COMBAT,game);
+                    delay(2500);
+                    switchGameState(GameState.SHOP,game);
+                    game.shopActions -=1;
                 }
+                else if(key == 4){
+                    int healAmount = game.playerUnit.maxHealth / 4;
+                    healDamage(game.playerUnit,healAmount);
+                    println("Vous vous soignez de "+healAmount+" PV");
+                    delay(2500);
+                    switchGameState(GameState.SHOP,game);
+                    game.shopActions -=1;
+                    //ICI finir les actions du shop, créer le système de gestion du nombre d'actions restantes du shop, ajouter une variable level aux sorts
+                }
+                else if(key == 5){
+                    switchGameState(GameState.UPGRADE,game);
+                }
+                else if(key == 6){
+                    switchGameState(GameState.OBLIVION,game);
+                }
+                break;
+            case UPGRADE:
+                spellIndex = game.playerUnit.baseDeck[inputIndex];
+                choosenSpell = game.theBook.allSpells[spellIndex];
+                int spellLevel = getSpellLevel(choosenSpell);
+                if (spellLevel == 1){
+                    game.playerUnit.baseDeck = remove(game.playerUnit.baseDeck,spellIndex);
+                    String upgradedSpellName = choosenSpell.name + " 2";
+                    int upgradedSpellIndex = getSpellIndex(game.theBook,upgradedSpellName);
+                    game.playerUnit.baseDeck = append(game.playerUnit.baseDeck,upgradedSpellIndex);
+                    println("Le sort "+choosenSpell.name+" a été amélioré en "+ upgradedSpellName +" !");
+                    delay(2500);
+                    switchGameState(GameState.SHOP,game);
+                    game.shopActions -=1;
+                }
+                else{
+                    println("Le sort a déjà été amélioré!");
+                    delay(2500);
+                    switchGameState(GameState.UPGRADE,game);
+                }
+                break;
+            case OBLIVION:
+                spellIndex = game.playerUnit.baseDeck[inputIndex];
+                choosenSpell = game.theBook.allSpells[spellIndex];
+                game.playerUnit.baseDeck = remove(game.playerUnit.baseDeck,spellIndex);
+                println("Le sort "+choosenSpell.name+" a été retiré du deck!");
+                delay(2500);
+                switchGameState(GameState.SHOP,game);
+                game.shopActions -=1;
+
                 break;
         }
     }
@@ -390,7 +457,7 @@ DRAGON_LORD,35,1.}
                 else{
                     targetUnit.buffList[BUFFID_SHOCK].power += power;
                 }
-                println(targetUnit+" subira "+targetUnit.buffList[BUFFID_SHOCK].power+" dégats au début de son prochain tour!");
+                println(targetUnit.name+" subira "+targetUnit.buffList[BUFFID_SHOCK].power+" dégats au début de son prochain tour!");
                 break;
             
             case CONCUSS:
@@ -590,6 +657,21 @@ DRAGON_LORD,35,1.}
         return unit.health>0;
     }
 
+    void handleEnemyDeath(Game game){
+            game.level++;
+            String nextOpponentName = MONSTER_NAMES_LIST[game.level];
+            game.enemyUnit = newUnit(nextOpponentName);
+            game.enemyUnit.gameLink = game;
+            importDeck(game.enemyUnit,DECK_FILE,game.theBook);
+            importStats(game.enemyUnit,MONTERS_STATS);
+            switchGameState(GameState.SHOP,game);
+            game.shopActions = 2;
+    }
+
+    void handlePlayerDeath(Game game){
+        game.run = false;
+    }
+
     //EFFECT METHODS--------------------------------------------------------------------------------------------
     String toString(Effect type){
         String res = "";
@@ -613,7 +695,7 @@ DRAGON_LORD,35,1.}
                 res="dégats de choc";
                 break;
             case CONCUSS:
-                res="tours d'étourdissement";
+                res="tours d'armure réduite";
                 break;
             case IGNITE:
                 res="embrasement";
@@ -715,12 +797,23 @@ DRAGON_LORD,35,1.}
 
     void castSpell(Spell spell,Unit self, Unit foe, double multiplicator){
         println(self.name+" a lancé "+spell.name+" !");
-        int abilityCount = length(spell.spellAbilities);
+        final int abilityCount = length(spell.spellAbilities);
         for(int i = 0; i<abilityCount; i++){
             Ability ability = spell.spellAbilities[i];
             Unit targetUnit = targetSwitch(ability.targetType,self,foe);
             executeAbility(ability,targetUnit,multiplicator);
         }
+    }
+
+    int getSpellLevel(Spell spell){
+        int res = 1;
+        final int spellNameLength = length(spell.name);
+        final char identifier = spell.name.charAt(spellNameLength-1);
+        if(identifier>='1' && identifier<='9'){
+            res = Character.getNumericValue(identifier);
+        }
+        return res;
+
     }
 
     //SPRITE METHODS--------------------------------------------------------------------------------------------
@@ -922,9 +1015,11 @@ DRAGON_LORD,35,1.}
         clearScreen();
         Game game = new Game();
         game.theBook = initialiseSpellBook();
+        
+        game.level=0;
 
         game.playerUnit = newUnit("PLAYER");
-        game.enemyUnit = newUnit("WOLF");
+        game.enemyUnit = newUnit(MONSTER_NAMES_LIST[game.level]);
         game.playerUnit.gameLink = game;
         game.enemyUnit.gameLink = game;
 
@@ -932,8 +1027,8 @@ DRAGON_LORD,35,1.}
         game.currentQuestion = null;
 
 
-        Sprite titleScreen = importSprite("ressources/spellAskerTitle.txt");
-        Sprite blankSquare = importSprite("ressources/blankSquare.txt");
+        final Sprite titleScreen = importSprite("ressources/spellAskerTitle.txt");
+        // final Sprite blankSquare = importSprite("ressources/blankSquare.txt");
 
         importDeck(game.playerUnit,DECK_FILE,game.theBook);
         importDeck(game.enemyUnit,DECK_FILE,game.theBook);
@@ -968,7 +1063,7 @@ DRAGON_LORD,35,1.}
                         println("4.Quitter le jeu");
                         game.initGameState = false;
                     }
-                    input(getPlayerInput('4'),game);
+                    input(getPlayerInput(4),game);
                     break;
                 case MAP:
                     if(game.initGameState){
@@ -996,6 +1091,7 @@ DRAGON_LORD,35,1.}
                     clearScreen();
 
                     applyBuffs(game.playerUnit);
+                    if(!isAlive(game.playerUnit)) handlePlayerDeath(game);
 
                     println(toString(game.playerUnit));
                     println(toString(game.enemyUnit));
@@ -1023,26 +1119,44 @@ DRAGON_LORD,35,1.}
                         Spell elem = game.theBook.allSpells[elemIdx];
                         println((index+1)+": "+toString(elem));
                     }
-                    char handLen = (char)(length(game.playerUnit.hand)+'0');
+                    int handLen = length(game.playerUnit.hand);
                     input(getPlayerInput(handLen),game);
 
                     if(game.gameState != GameState.SHOP) switchGameState(GameState.QUESTION,game);
                     
                     break;
                 case SHOP:
-                    if(game.initGameState){
-                        println("Choose a card to add to your deck:");
-                        int spellCount = length(game.theBook.allSpells);
-                        int[] selectedSpells = new int[4];
-                        for(int i = 0; i<4; i++){
-                            int randomSpell = (int)(random()*(spellCount/2))+1;
-                            selectedSpells[i] = randomSpell;
-                            println(toString(game.theBook.allSpells[randomSpell]));
+                    if(game.shopActions>0){
+                        if(game.initGameState){
+                            if(game.debug) println(game.playerUnit.baseDeck);
+                            println(toString(game.playerUnit));
+                            println("Vous arrivez à un camp! Que souhaitez vous faire? (vous pouvez encore réaliser "+game.shopActions+" actions):");
+                            println("-------Apprendre de nouveaux sorts (1 parmis ceux là):-------");
+                            int spellCount = length(game.theBook.allSpells);
+                            final int shopSize = 3;
+                            int[] selectedSpells = new int[shopSize];
+                            for(int i = 0; i<shopSize; i++){
+                                int randomSpell = (int)(random()*(spellCount/2))*2;
+                                selectedSpells[i] = randomSpell;
+                                println((i+1)+": "+toString(game.theBook.allSpells[randomSpell]));
+                            }
+                            println("-------Panser vos plaies:-------");
+                            println("4: Vous soigner de 25% de vos PV max");
+                            println();
+                            println("-------Vous préparer:-------");
+                            println("5: Améliorer un sort de votre deck");
+                            println();
+                            println("-------Méditer:-------");
+                            println("6: Oublier 1 sort de votre deck");
+                            println();
+                            game.shopList = selectedSpells;
+                            game.initGameState = false;
                         }
-                        game.shopList = selectedSpells;
-                        game.initGameState = false;
+                        input(getPlayerInput(6),game);
                     }
-                    input(getPlayerInput('4'),game);
+                    else{
+                        switchGameState(GameState.COMBAT,game);
+                    }
                     break;
                 case SPELLIST:
                     if(game.initGameState){
@@ -1050,7 +1164,7 @@ DRAGON_LORD,35,1.}
                         println("1.Retour");
                         game.initGameState = false;
                     }
-                    input(getPlayerInput('1'),game);
+                    input(getPlayerInput(1),game);
                     break;
                 case QUESLIST:
                     if(game.initGameState){
@@ -1060,15 +1174,50 @@ DRAGON_LORD,35,1.}
                         println("1.Retour");
                         game.initGameState = false;
                     }
-                    input(getPlayerInput('1'),game);
+                    input(getPlayerInput(1),game);
                     break;
                 case QUESTION:
                     if(game.initGameState){
                         int randomIndex = (int)(random()*length(game.questionList));
                         game.currentQuestion = game.questionList[randomIndex];
                         println(toString(game.currentQuestion));
+                        game.initGameState = false;
                     }
-                    input(getPlayerInput('4'),game);
+                    input(getPlayerInput(4),game);
+                    break;
+                case UPGRADE:
+                    if(game.initGameState){
+                        println("Choisissez le sort que vous allez améliorer:");
+                        for(int index = 0; index<length(game.playerUnit.baseDeck); index++){
+                            int spellIndex = game.playerUnit.baseDeck[index];
+                            Spell element = game.theBook.allSpells[spellIndex];
+                            println((index+1)+": "+toString(element));
+                        }
+                        game.initGameState = false;
+                    }
+
+                    input(getPlayerInput(length(game.playerUnit.baseDeck)),game);
+                    break;
+                case OBLIVION:
+                    if(length(game.playerUnit.baseDeck)>4){
+                        if(game.initGameState){
+                            println("Choisissez un sort à oublier:");
+                            for(int index = 0; index<length(game.playerUnit.baseDeck); index++){
+                                int spellIndex = game.playerUnit.baseDeck[index];
+                                Spell element = game.theBook.allSpells[spellIndex];
+                                println((index+1)+": "+toString(element));
+                            }
+                            game.initGameState = false;
+                        }
+
+                        input(getPlayerInput(length(game.playerUnit.baseDeck)),game);
+                    }
+                    else{
+                        println("Vous ne pouvez pas oublier plus de sorts de votre deck (votre deck est déjà trop petit)!");
+                        delay(2500);
+                        switchGameState(GameState.SHOP,game);
+                    }
+                    
                     break;
             }
         }

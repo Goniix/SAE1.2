@@ -1,5 +1,6 @@
 name,maxHealth,powerFactor
 PLAYER,20,1.
+SHIT,1,1.
 DOG,9,1.
 WOLF,10,1.
 GHOST,12,1.

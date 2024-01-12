@@ -3,6 +3,8 @@ Frappe
 Frappe
 Frappe
 Soin
+Soin
+Bulk up
 Bulk up
 
 DOG
@@ -12,19 +14,18 @@ Griffe
 Griffe
 
 WOLF
-Griffe II
-Griffe II
 Griffe
 Griffe
-Griffe
-Griffe
+Intimidation
+Intimidation
+Bulk up
 Absorbe
 
 GHOST
 Poigne
 Poigne
-Frappe
-Frappe
+Intimidation
+Intimidation
 Frappe
 Frappe
 Frappe
@@ -43,12 +44,20 @@ Coup de fémur
 Coup de fémur
 Coup de fémur
 Coup de fémur
-Coup de fémur II
+Coup de fémur 2
 Gourdin
 
 DOOR_SKULL
-TOC TOC TOC
-Pied dans la porte
-Pied dans la porte
-Pied dans la porte
-Pied dans la porte
+Frappe
+Frappe
+Frappe
+Frappe
+Coup de bouclier
+Coup de bouclier
+Coup de bouclier 2
+
+SHIT
+Frappe
+Frappe
+Frappe
+Frappe
