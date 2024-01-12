@@ -7,12 +7,12 @@ Contacts : dxnkmeme@gmail.com, gabriel.redouin@gmail.com
 Splask est un RPG deckbuilding au tout par tour, où vous vous battez à coup de sorts et parrez les terribles questions de vos adversaires!
 A votre tour, lancez un sort, puis répondez à la question de votre adversaire. Si vous avez bon, vous subissez moins de dégats!
 
-Des captures d'écran illustrant le fonctionnement du logiciel sont proposées dans le répertoire shots. (nan WIP)
+Des captures d'écran illustrant le fonctionnement du logiciel sont proposées dans le répertoire shots.
 
 
 # Utilisation de Splask
-Les boucles, cycles d'états du jeu et import des données fonctionnent
-La modification de deck, la détection de fin de combat et de fin de partie ne sont pas encore implémentés (le jeu ne s'arrête jamais on reste stuck dans un combat infinit)
+(La sauvegarde des highscore n'est pas fonctionnelle à cause d'une erreur avec la fonction saveCSV. la fonction saveScore est donc commentée, même si appellée à plusieurs endroits dans le code
+Je ne suis pas parvenu à debug, l'erreur obtenue était un simple "stackoverflow" sans plus de précision. merci ça m'aide pas)
 
 Afin d'utiliser le projet, il suffit de taper les commandes suivantes dans un terminal :
 
