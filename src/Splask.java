@@ -533,6 +533,10 @@ class Splask extends Program{
 
     void handleEnemyDeath(Game game){
             game.level++;
+            game.playerUnit.maxHealth += level*2;
+            println(game.enemyUnit.name+" disparait!");
+            println("Vous gagnez "+(level*2)+" PV max!");
+            delay(2000);
             String nextOpponentName = MONSTER_NAMES_LIST[game.level];
             game.enemyUnit = newUnit(nextOpponentName);
             game.enemyUnit.gameLink = game;

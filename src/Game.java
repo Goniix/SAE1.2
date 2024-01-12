@@ -6,7 +6,6 @@ class Game{
     
     boolean debug = true;
 
-    String[] ennemyList = new String[] {"WOLF","WOLF","WOLF"};
     Question[] questionList;
     Question currentQuestion;
 

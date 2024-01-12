@@ -10,8 +10,8 @@ Bulk up
 DOG
 Griffe
 Griffe
-Griffe
-Griffe
+Intimidation
+Intimidation
 
 WOLF
 Griffe
@@ -56,8 +56,62 @@ Coup de bouclier
 Coup de bouclier
 Coup de bouclier 2
 
-SHIT
+GOOE
+Dissoudre
+Dissoudre
+Dissoudre
+Concentration
+
+WRAITH
+Poigne 2
+Poigne
+Frappe
+Frappe 2
+
+ZOMBIE
+Frappe 2
 Frappe
 Frappe
 Frappe
+
+BB_DRAGON
+Souffle enflamé
+Souffle enflamé
 Frappe
+Frappe
+Frappe
+
+LICH
+Guérison infernale 2
+Intimidation 2
+Expurgation 2
+Fatal Foudre
+Fatal Foudre
+
+WEREWOLF
+Griffe
+Griffe
+Griffe rouillée
+Concentration
+
+DRAGON
+Ecaille draconique
+Souffle enflamé
+Souffle enflamé
+Souffle enflamé
+Souffle enflamé
+Griffe
+
+DRAGON_SEER
+Griffe royale
+Griffe royale
+Ecaille draconique
+Souffle enflamé
+Souffle enflamé
+
+DRAGON_LORD
+Griffe royale 2
+Griffe royale 2
+Ecaille draconique 2
+Souffle enflamé 2
+Souffle enflamé 2
