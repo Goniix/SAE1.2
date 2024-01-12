@@ -783,7 +783,7 @@ class Splask extends Program{
                 break;
             
             case IGNITE:
-                res+="Embrasement de "+buff.power+" dégats";
+                res+="Embrasement";
                 break;
             case REGEN:
                 res+="Régénération de "+buff.power+" PV";
