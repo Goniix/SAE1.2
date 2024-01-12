@@ -438,17 +438,17 @@ class Splask extends Program{
             case BLEED:
                 if(targetUnit.buffList[BUFFID_BLEED] == null){
                     targetUnit.buffList[BUFFID_BLEED] = newBuff(power,0,type);
-                    println(targetUnit.name+" se met à saigner!");
+                    println(targetUnit.name+" se met à saigner pour "+power+" tours!");
                 }
                 else{
-                    targetUnit.buffList[BUFFID_BLEED].duration += 1;
-                    println(targetUnit.name+" continue de saigner!");
+                    targetUnit.buffList[BUFFID_BLEED].duration += 2;
+                    println(targetUnit.name+" saigne plus longtemps (encore"+targetUnit.buffList[BUFFID_BLEED].duration+" tours)!");
                 }
                 break;
 
             case POISON:
                 targetUnit.buffList[BUFFID_POISON] = newBuff(3,power,type);
-                println(targetUnit.name+" est empoisonné! Il perd "+(power*10)+"% de vie par tour!");
+                println(targetUnit.name+" est empoisonné! Il perd "+(power*10)+"% de vie par tour pour 3 tours!");
                 break;
             
             case SHOCK:
@@ -463,17 +463,17 @@ class Splask extends Program{
             
             case CONCUSS:
                 targetUnit.buffList[BUFFID_CONCUSS] = newBuff(power,3,type);
-                println(targetUnit.name+" est étourdit! Il subit 30% de dégats en plus!");
+                println(targetUnit.name+" est étourdit! Il subit 30% de dégats en plus pour 3 tours!");
                 break;
             
             case IGNITE:
                 targetUnit.buffList[BUFFID_IGNITE] = newBuff(power,0,type);
-                println(targetUnit.name + " brûle! Il ne peut plus se soigner!");
+                println(targetUnit.name + " brûle! Il ne peut plus se soigner pendant "+power+" tours!");
                 break;
             
             case REGEN:
                 targetUnit.buffList[BUFFID_REGEN] = newBuff(3,power,type);
-                println(targetUnit.name + " commence à se régénérer!");
+                println(targetUnit.name + " commence à se régénérer de "+power+" PV pendant 3 tours!");
                 break;
 
                 
@@ -779,7 +779,7 @@ class Splask extends Program{
                 break;
             
             case CONCUSS:
-                res+="Etourdissement";
+                res+="Armure réduite";
                 break;
             
             case IGNITE:
