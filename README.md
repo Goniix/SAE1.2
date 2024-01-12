@@ -4,7 +4,8 @@ Développé par Nathanael COLLUMEAU, Gabriel REDOUIN-INNECCO
 Contacts : dxnkmeme@gmail.com, gabriel.redouin@gmail.com
 
 # Présentation de Splask
-WIP
+Splask est un RPG deckbuilding au tout par tour, où vous vous battez à coup de sorts et parrez les terribles questions de vos adversaires!
+A votre tour, lancez un sort, puis répondez à la question de votre adversaire. Si vous avez bon, vous subissez moins de dégats!
 
 Des captures d'écran illustrant le fonctionnement du logiciel sont proposées dans le répertoire shots. (nan WIP)
 

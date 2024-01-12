@@ -1,6 +1,8 @@
 import extensions.CSVFile;
 import extensions.File;
 import ijava.Curses;
+import java.io.*;
+import java.time.*;
 class Splask extends Program{
     final String ASCIILINE = "-----------------------------------------------";
     final String DECK_FILE = "ressources/deckList.txt";
@@ -86,75 +88,106 @@ class Splask extends Program{
 
     
     //DYNAMIC PILES METHODS
-    //INT PILES
-    int[] rebuild(int[] pile, int len){
-        int[] newPile = new int[len];
-        int refIndex = 0;
-        int oldIndex = 0;
-        while(refIndex<len && oldIndex<length(pile)){
-            if(pile[oldIndex] != -1){
-                newPile[refIndex] = pile[oldIndex];
-                refIndex++;
+        //INT PILES
+        int[] rebuild(int[] pile, int len){
+            int[] newPile = new int[len];
+            int refIndex = 0;
+            int oldIndex = 0;
+            while(refIndex<len && oldIndex<length(pile)){
+                if(pile[oldIndex] != -1){
+                    newPile[refIndex] = pile[oldIndex];
+                    refIndex++;
+                }
+                oldIndex++;
             }
-            oldIndex++;
+            return newPile;
         }
-        return newPile;
-    }
 
-    int[] append(int[] pile, int element){
-        int[] res = rebuild(pile,length(pile)+1);
-        res[length(pile)] = element;
-        return res;
-    }
-
-    int[] append(int[] pile, int[] element){
-        int[] res = rebuild(pile,length(pile)+length(element));
-        for(int index = length(pile); index<length(pile)+length(element); index++){
-            res[index] = element[index-length(pile)];
+        int[] append(int[] pile, int element){
+            int[] res = rebuild(pile,length(pile)+1);
+            res[length(pile)] = element;
+            return res;
         }
-        return res;
-    }
 
-    int[] remove(int[] pile, int removeIndex){
-        int[] res = new int[length(pile)-1];
-        for(int pileIndex = 0; pileIndex<length(pile)-1; pileIndex++){
-            if(pileIndex>=removeIndex) res[pileIndex] = pile[pileIndex+1];
-            else res[pileIndex] = pile[pileIndex];
+        int[] append(int[] pile, int[] element){
+            int[] res = rebuild(pile,length(pile)+length(element));
+            for(int index = length(pile); index<length(pile)+length(element); index++){
+                res[index] = element[index-length(pile)];
+            }
+            return res;
         }
-        return res;
-    }
 
-    int[] shuffle(int[] pile){
-        int len = length(pile);
-        for(int index = 0; index<len; index++){
-            int randomIndex = (int) (random()*len);
-            int temp = pile[index];
-            pile[index] = pile[randomIndex];
-            pile[randomIndex] = temp;
+        int[] remove(int[] pile, int removeIndex){
+            int[] res = new int[length(pile)-1];
+            for(int pileIndex = 0; pileIndex<length(pile)-1; pileIndex++){
+                if(pileIndex>=removeIndex) res[pileIndex] = pile[pileIndex+1];
+                else res[pileIndex] = pile[pileIndex];
+            }
+            return res;
         }
-        return pile;
-    }
 
-    int[] copy(int[] pile){
-        int[] res = new int[length(pile)];
-        for(int index = 0; index<length(pile); index++){
-            res[index] = pile[index];
+        int[] shuffle(int[] pile){
+            int len = length(pile);
+            for(int index = 0; index<len; index++){
+                int randomIndex = (int) (random()*len);
+                int temp = pile[index];
+                pile[index] = pile[randomIndex];
+                pile[randomIndex] = temp;
+            }
+            return pile;
         }
-        return res;
-    }
 
-    void println(int[] pile){
-        String res = "[";
-        for(int index = 0; index<length(pile); index++){
-            res+=pile[index]+", ";
+        int[] copy(int[] pile){
+            int[] res = new int[length(pile)];
+            for(int index = 0; index<length(pile); index++){
+                res[index] = pile[index];
+            }
+            return res;
         }
-        println(res+"]");
-    }
+
+        void println(int[] pile){
+            String res = "[";
+            for(int index = 0; index<length(pile); index++){
+                res+=pile[index]+", ";
+            }
+            println(res+"]");
+        }
+
+    //OTHER--------------------------------------------------------------------------------------------
 
     void switchGameState(GameState state, Game game){
         game.gameState = state;
         game.initGameState = true;
         clearScreen();
+    }
+
+    void saveScore(Game game){
+        // java.io.File file = new java.io.File("src/highscores.txt");
+        // FileWriter fr = new FileWriter(file, true);
+        // LocalDate currentDate = LocalDate.now();
+        // String currentDateString = currentDate.toString();
+        // fr.write(currentDateString+":Level "+game.level);
+        // fr.close();
+        CSVFile importedFile = loadCSV("src/highscores.txt",',');
+        String[][] importedTab = readCSV(importedFile);
+        String[][] resTab = new String[rowCount(importedFile)+1][1];
+        LocalDate currentDate = LocalDate.now();
+        String currentDateString = currentDate.toString();
+        for(int index = 0; index<rowCount(importedFile); index++){
+            resTab[index][0] = getCell(importedFile,index,0);
+        }
+        resTab[length(resTab,1)-1][0]=currentDateString+": Level "+game.level;
+        saveCSV(resTab,"src/highscores.txt",',');
+    }
+
+    String[][] readCSV(CSVFile importedFile){
+        String[][] res = new String[rowCount(importedFile)][columnCount(importedFile)];
+        for(int idy = 0; idy<rowCount(importedFile); idy++){
+            for(int idx = 0; idx<columnCount(importedFile); idx++){
+                res[idy][idx] = getCell(importedFile,idy,idx);
+            }
+        }
+        return res;
     }
 
     //ABILITY METHODS--------------------------------------------------------------------------------------------
@@ -397,7 +430,6 @@ class Splask extends Program{
     //imports spell id from list of String (deckList)
         int stringedLen = length(stringedList);
         int[] res = new int[stringedLen];
-        println(stringedList);
         for(int index = 0; index<stringedLen; index++){
             res[index] = getSpellIndex(book,stringedList[index]);
         }
@@ -533,21 +565,31 @@ class Splask extends Program{
 
     void handleEnemyDeath(Game game){
             game.level++;
-            game.playerUnit.maxHealth += level*2;
-            println(game.enemyUnit.name+" disparait!");
-            println("Vous gagnez "+(level*2)+" PV max!");
-            delay(2000);
-            String nextOpponentName = MONSTER_NAMES_LIST[game.level];
-            game.enemyUnit = newUnit(nextOpponentName);
-            game.enemyUnit.gameLink = game;
-            importDeck(game.enemyUnit,DECK_FILE,game.theBook);
-            importStats(game.enemyUnit,MONTERS_STATS);
-            switchGameState(GameState.SHOP,game);
-            game.shopActions = 2;
+            if(game.level<length(MONSTER_NAMES_LIST)){
+                game.playerUnit.maxHealth += game.level*2;
+                println(game.enemyUnit.name+" disparait!");
+                println("Vous gagnez "+(game.level*2)+" PV max!");
+                delay(2000);
+                String nextOpponentName = MONSTER_NAMES_LIST[game.level];
+                game.enemyUnit = newUnit(nextOpponentName);
+                game.enemyUnit.gameLink = game;
+                importDeck(game.enemyUnit,DECK_FILE,game.theBook);
+                importStats(game.enemyUnit,MONTERS_STATS);
+                switchGameState(GameState.SHOP,game);
+                game.shopActions = 2;
+            }
+            else{
+                game.gameoverMessage ="INCROYABLE! Vous avez gagné! Le monde disparait lentement, en même temps que\nla dépouille du seigneur. Vous vous sentez Victorieux!\nVotre score a été sauvegardé";
+                saveScore(game);
+                game.run = false;
+            }
+
     }
 
     void handlePlayerDeath(Game game){
         game.run = false;
+        saveScore(game);
+        game.gameoverMessage="Vous mourrez lamentablement...\nVotre score a été sauvegardé.";
     }
 
     //EFFECT METHODS--------------------------------------------------------------------------------------------
@@ -1172,6 +1214,7 @@ class Splask extends Program{
         game.questionList = importQuestionList("ressources/questions.csv");
         game.currentQuestion = null;
 
+        game.gameoverMessage = "";
 
         game.titleScreen = importSprite("ressources/spellAskerTitle.txt");
         // final Sprite blankSquare = importSprite("ressources/blankSquare.txt");
@@ -1258,6 +1301,6 @@ class Splask extends Program{
             }
         }
         clearScreen();
-        println("GameOver! vous avez perdu.");
+        println(game.gameoverMessage);
     }
 }

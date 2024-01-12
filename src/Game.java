@@ -3,8 +3,10 @@ class Game{
     boolean initGameState = true;
     boolean run = true;
     boolean error = false;
+
+    String gameoverMessage;
     
-    boolean debug = true;
+    boolean debug = false;
 
     Question[] questionList;
     Question currentQuestion;
