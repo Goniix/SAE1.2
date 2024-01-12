@@ -56,6 +56,7 @@ class Splask extends Program{
         int res;
         do{
             do{
+                print("Entrez un chiffre entre 1 et "+max+": ");
                 input=readString();
             }while(length(input)>length(stringedMax) || length(input)==0 || !isStringNumeric(input));
             res = Integer.parseInt(input);
