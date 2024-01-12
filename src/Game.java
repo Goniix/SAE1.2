@@ -11,7 +11,10 @@ class Game{
     Question currentQuestion;
 
     int[] shopList;
-    
+/*
+    int[] cardChoiceList;
+    int cardChoiceResult;
+    */
     SpellBook theBook;
     Unit playerUnit;
     Unit enemyUnit;

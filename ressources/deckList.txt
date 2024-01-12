@@ -44,7 +44,7 @@ Coup de fémur
 Coup de fémur
 Coup de fémur
 Coup de fémur
-Coup de fémur II
+Coup de fémur 2
 Gourdin
 
 DOOR_SKULL
@@ -54,4 +54,4 @@ Frappe
 Frappe
 Coup de bouclier
 Coup de bouclier
-Coup de bouclier II
+Coup de bouclier 2

@@ -39,15 +39,27 @@ class Splask extends Program{
         return (numb1>numb2) ? numb1 : numb2;
     }
 
-    char getPlayerInput(char max){
+    boolean isStringNumeric(String chain){
+        boolean res = true;
+        int index = 0;
+        while(index<length(chain) && res){
+            char elem = chain.charAt(index);
+            if(elem<'0' || elem>'9') res = false;
+            index++;
+        }
+        return res;
+    }
+
+    int getPlayerInput(int max){
         String input;
-        char res;
-        do{ 
+        String stringedMax = max + "";
+        int res;
+        do{
             do{
                 input=readString();
-            }while(length(input)>1 || length(input)==0);
-            res = input.charAt(0);
-        }while(res>max || res<'1');
+            }while(length(input)>length(stringedMax) || length(input)==0 || !isStringNumeric(input));
+            res = Integer.parseInt(input);
+        }while(res>max || res<1);
         return res;
     }
 
@@ -139,42 +151,42 @@ class Splask extends Program{
     }
 
     //GAMESTATE INPUTS--------------------------------------------------------------------------------------------
-    void input(char key, Game game){
+    void input(int key, Game game){
+        int inputIndex = key-1;
         switch(game.gameState){
             case TITLE:
                 switch(key){
-                    case '1':
+                    case 1:
                         switchGameState(GameState.COMBAT,game);
                         break;
-                    case '2':
+                    case 2:
                         switchGameState(GameState.SPELLIST,game);
                         break;
-                    case '3':
+                    case 3:
                         switchGameState(GameState.QUESLIST,game);
                         break;
-                    case '4':
+                    case 4:
                         game.run = false;
                         break;
                 }
                 break;
             case SPELLIST:
                 switch(key){
-                    case '1':
+                    case 1:
                         switchGameState(GameState.TITLE,game);
                         break;
                 }
                 break;
             case QUESLIST:
                 switch(key){
-                    case '1':
+                    case 1:
                         switchGameState(GameState.TITLE,game);
                         break;
                 }
                 break;
             case COMBAT:
-                if(key>='1' && key<='4'){
+                //if(key>='1' && key<='4'){
                     clearScreen();
-                    int inputIndex = Character.getNumericValue(key)-1;
                     handleUnitTurn(game.playerUnit,game.enemyUnit,inputIndex,game.playerUnit.strength,game);
                     if(!isAlive(game.playerUnit)) game.run = false;
                     if(!isAlive(game.enemyUnit)){
@@ -183,12 +195,11 @@ class Splask extends Program{
                         switchGameState(GameState.SHOP,game);
                     }
 
-                }
+                //}
                 break;
             case QUESTION:
-                if(key>='1' && key<='4'){
+                if(key>=1 && key<=4){
                     clearScreen();
-                    int inputIndex = Character.getNumericValue(key)-1;
                     boolean rightAnswer = answerIsValid(game.currentQuestion,inputIndex);
 
                     double answerMultiplier = game.enemyUnit.strength;
@@ -206,19 +217,34 @@ class Splask extends Program{
                 }
                 break;
             case SHOP:
-                if(key>='1' && key<='3'){
-                    int inputIndex = Character.getNumericValue(key)-1;
+                if(key>=1 && key<=3){
                     int selectedSpellIndex = game.shopList[inputIndex];
                     Spell selectedSpell = game.theBook.allSpells[selectedSpellIndex];
                     println("Vous ajoutez "+ selectedSpell.name+" à votre deck!");
                     game.playerUnit.baseDeck = append(game.playerUnit.baseDeck,selectedSpellIndex);
                     switchGameState(GameState.COMBAT,game);
                 }
-                else if(key == '4'){
+                else if(key == 4){
                     int healAmount = game.playerUnit.maxHealth / 4;
                     healDamage(game.playerUnit,healAmount);
                     println("Vous vous soignez de "+healAmount+" PV");
                     //ICI finir les actions du shop, créer le système de gestion du nombre d'actions restantes du shop, ajouter une variable level aux sorts
+                    //FIX LE SYSTEME SINPUTS QUI NE PEUX RECEVOIR QUE DES CHIFFRES DE 1 A 9
+                }
+                else if(key == 5){
+                    switchGameState(GameState.UPGRADE,game);
+                }
+                break;
+            case UPGRADE:
+                int spellIndex = game.playerUnit.baseDeck[inputIndex];
+                Spell choosenSpell = game.theBook.allSpells[spellIndex];
+                int spellLevel = getSpellLevel(choosenSpell);
+                if (spellLevel == 1){
+                    println("Le sort "+choosenSpell.name+" a été amélioré!");
+                    switchGameState(GameState.SHOP,game);
+                }
+                else{
+                    println("Le sort a déjà été amélioré!");
                 }
                 break;
         }
@@ -719,12 +745,23 @@ class Splask extends Program{
 
     void castSpell(Spell spell,Unit self, Unit foe, double multiplicator){
         println(self.name+" a lancé "+spell.name+" !");
-        int abilityCount = length(spell.spellAbilities);
+        final int abilityCount = length(spell.spellAbilities);
         for(int i = 0; i<abilityCount; i++){
             Ability ability = spell.spellAbilities[i];
             Unit targetUnit = targetSwitch(ability.targetType,self,foe);
             executeAbility(ability,targetUnit,multiplicator);
         }
+    }
+
+    int getSpellLevel(Spell spell){
+        int res = 1;
+        final int spellNameLength = length(spell.name);
+        final char identifier = spell.name.charAt(spellNameLength-1);
+        if(identifier>='1' && identifier<='9'){
+            res = Character.getNumericValue(identifier);
+        }
+        return res;
+
     }
 
     //SPRITE METHODS--------------------------------------------------------------------------------------------
@@ -1082,8 +1119,31 @@ class Splask extends Program{
                         int randomIndex = (int)(random()*length(game.questionList));
                         game.currentQuestion = game.questionList[randomIndex];
                         println(toString(game.currentQuestion));
+                        game.initGameState = false;
                     }
                     input(getPlayerInput('4'),game);
+                    break;
+                /*case CARDCHOICE:
+                    if(game.initGameState){
+                        for(int index = 0; index<length(game.cardChoiceList); index++){
+                            int spellIndex = game.cardChoiceList[index];
+                            Spell element = game.theBook.allSpells[spellIndex];
+                        }
+                        game.initGameState = false;
+                    }
+                    final int cardChoiceSize = length(game.cardChoiceList);
+                    input(getPlayerInput(Character.getNumericValue(totalSpellCount)),game);
+                    break;*/
+                case UPGRADE:
+                    if(game.initGameState){
+                        for(int index = 0; index<length(game.playerUnit.baseDeck); index++){
+                            int spellIndex = game.playerUnit.baseDeck[index];
+                            Spell element = game.theBook.allSpells[spellIndex];
+                        }
+                        game.initGameState = false;
+                    }
+                    final int playerDeckSize = length(game.playerUnit.baseDeck);
+                    input(getPlayerInput(Character.forDigit(playerDeckSize,10)),game);
                     break;
             }
         }
