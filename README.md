@@ -19,9 +19,11 @@ Afin d'utiliser le projet, il suffit de taper les commandes suivantes dans un te
 ```
 ./compile.sh
 ```
+(si ça ne marche pas lancez ```sed -i -e 's/\r$//' compile.sh```)
 Permet la compilation des fichiers présents dans 'src' et création des fichiers '.class' dans 'classes'
 
 ```
 ./run.sh
 ```
+(si ça ne marche pas lancez ```sed -i -e 's/\r$//' run.sh```)
 Permet le lancement du jeu

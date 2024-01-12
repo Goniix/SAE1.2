@@ -26,4 +26,5 @@ class Game{
 
     //SPRITES
     Sprite titleScreen;
+    Sprite dragonLord;
 }

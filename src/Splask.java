@@ -162,13 +162,9 @@ class Splask extends Program{
     }
 
     void saveScore(Game game){
-        // java.io.File file = new java.io.File("src/highscores.txt");
-        // FileWriter fr = new FileWriter(file, true);
-        // LocalDate currentDate = LocalDate.now();
-        // String currentDateString = currentDate.toString();
-        // fr.write(currentDateString+":Level "+game.level);
-        // fr.close();
-        CSVFile importedFile = loadCSV("src/highscores.txt",',');
+        //POUR UNE RAISON INCONNUE saveCSV ME RENVOIE UN STACKOVERFLOW SANS AUCUNE RAISON, JE NAI DONC AUCUN MOYEN DE SAUVEGARDER DES FICHIERS. SUPER
+        /*
+        CSVFile importedFile = loadCSV("ressources/highscores.csv",',');
         String[][] importedTab = readCSV(importedFile);
         String[][] resTab = new String[rowCount(importedFile)+1][1];
         LocalDate currentDate = LocalDate.now();
@@ -177,7 +173,8 @@ class Splask extends Program{
             resTab[index][0] = getCell(importedFile,index,0);
         }
         resTab[length(resTab,1)-1][0]=currentDateString+": Level "+game.level;
-        saveCSV(resTab,"src/highscores.txt",',');
+        saveCSV(resTab,"ressources/highscores.csv",',');
+        */
     }
 
     String[][] readCSV(CSVFile importedFile){
@@ -470,7 +467,7 @@ class Splask extends Program{
         self.hand = remove(self.hand,inputIndex);
         // self.hand = rebuild(self.hand,length(self.hand)-1);
         drawCard(self,1);
-        delay(2500);
+        delay(2000);
     }
 
     void remakeDeck(Unit unit){
@@ -548,6 +545,7 @@ class Splask extends Program{
         String rowID;
         do{
             rowID = getCell(statFile,index,0);
+            // println(rowID);
             index++;
         }
         while(index<rowCount(statFile) && !rowID.equals(deckID));
@@ -979,6 +977,7 @@ class Splask extends Program{
 
         applyBuffs(game.playerUnit);
         if(!isAlive(game.playerUnit)) handlePlayerDeath(game);
+        if(game.enemyUnit.name == "DRAGON_LORD") println(toString(game.dragonLord));
 
         println(toString(game.playerUnit));
         println(toString(game.enemyUnit));
@@ -1051,7 +1050,7 @@ class Splask extends Program{
             Spell selectedSpell = game.theBook.allSpells[selectedSpellIndex];
             println("Vous ajoutez "+ selectedSpell.name+" à votre deck!");
             game.playerUnit.baseDeck = append(game.playerUnit.baseDeck,selectedSpellIndex);
-            delay(2500);
+            delay(2000);
             switchGameState(GameState.SHOP,game);
             game.shopActions -=1;
         }
@@ -1061,7 +1060,7 @@ class Splask extends Program{
                     int healAmount = game.playerUnit.maxHealth / 4;
                     healDamage(game.playerUnit,healAmount);
                     println("Vous vous soignez de "+healAmount+" PV");
-                    delay(2500);
+                    delay(2000);
                     switchGameState(GameState.SHOP,game);
                     game.shopActions -=1;
                     break;
@@ -1163,13 +1162,13 @@ class Splask extends Program{
             int upgradedSpellIndex = getSpellIndex(game.theBook,upgradedSpellName);
             game.playerUnit.baseDeck = append(game.playerUnit.baseDeck,upgradedSpellIndex);
             println("Le sort "+choosenSpell.name+" a été amélioré en "+ upgradedSpellName +" !");
-            delay(2500);
+            delay(2000);
             switchGameState(GameState.SHOP,game);
             game.shopActions -=1;
         }
         else{
             println("Le sort a déjà été amélioré!");
-            delay(2500);
+            delay(2000);
             switchGameState(GameState.SHOP,game);
         }
     }
@@ -1191,7 +1190,7 @@ class Splask extends Program{
         Spell choosenSpell = game.theBook.allSpells[spellIndex];
         game.playerUnit.baseDeck = remove(game.playerUnit.baseDeck,spellIndex);
         println("Le sort "+choosenSpell.name+" a été retiré du deck!");
-        delay(2500);
+        delay(2000);
         switchGameState(GameState.SHOP,game);
         game.shopActions -=1;
     }
@@ -1207,16 +1206,17 @@ class Splask extends Program{
         game.level=0;
 
         game.playerUnit = newUnit("PLAYER");
-        game.enemyUnit = newUnit(MONSTER_NAMES_LIST[game.level]);
+        // game.enemyUnit = newUnit(MONSTER_NAMES_LIST[game.level]);
+        game.enemyUnit = newUnit("DRAGON_LORD");
         game.playerUnit.gameLink = game;
         game.enemyUnit.gameLink = game;
 
         game.questionList = importQuestionList("ressources/questions.csv");
         game.currentQuestion = null;
-
         game.gameoverMessage = "";
 
         game.titleScreen = importSprite("ressources/spellAskerTitle.txt");
+        game.dragonLord = importSprite("ressources/dragon.txt");
         // final Sprite blankSquare = importSprite("ressources/blankSquare.txt");
 
         importDeck(game.playerUnit,DECK_FILE,game.theBook);
@@ -1293,7 +1293,7 @@ class Splask extends Program{
                     }
                     else{
                         println("Vous ne pouvez pas oublier plus de sorts de votre deck (votre deck est déjà trop petit)!");
-                        delay(2500);
+                        delay(2000);
                         switchGameState(GameState.SHOP,game);
                     }
                     
