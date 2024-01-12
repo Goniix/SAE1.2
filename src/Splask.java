@@ -1206,8 +1206,7 @@ class Splask extends Program{
         game.level=0;
 
         game.playerUnit = newUnit("PLAYER");
-        // game.enemyUnit = newUnit(MONSTER_NAMES_LIST[game.level]);
-        game.enemyUnit = newUnit("DRAGON_LORD");
+        game.enemyUnit = newUnit(MONSTER_NAMES_LIST[game.level]);
         game.playerUnit.gameLink = game;
         game.enemyUnit.gameLink = game;
 
