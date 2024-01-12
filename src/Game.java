@@ -22,4 +22,7 @@ class Game{
     Unit playerUnit;
     Unit enemyUnit;
     int enemyNextAttack;
+
+    //SPRITES
+    Sprite titleScreen;
 }
