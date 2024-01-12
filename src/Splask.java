@@ -499,6 +499,13 @@ class Splask extends Program{
         res+= "Vie: "+ unit.health;
         if(unit.buffList[BUFFID_SHIELD]!=null) res += " + " + unit.buffList[BUFFID_SHIELD].power; 
         res+= " / " + unit.maxHealth + "\n";
+        final int buffCount = length(unit.buffList);
+        for(int index = 0; index<buffCount; index++){
+            Buff elem = unit.buffList[index];
+            if(elem!=null){
+                res+=toString(elem)+"\n";
+            }
+        }
         res+= ASCIILINE;
         return res;
     }
@@ -595,8 +602,11 @@ class Splask extends Program{
                     case BLEED:
                         if(unit.buffList[buffIndex].duration == 0){
                             unit.health-=buffPower;
+                            println("Ses plaies explosent, "+unit.name+"subit "+buff.power+" dégats de saignement!");
                         }
-                        println("Ses plaies explosent, "+unit.name+"subit "+buff.power+" dégats de saignement!");
+                        else{
+                            println(unit.name+" continue de saigner!");
+                        }
                         break;
 
                     case POISON:
@@ -774,6 +784,9 @@ class Splask extends Program{
             
             case IGNITE:
                 res+="Embrasement de "+buff.power+" dégats";
+                break;
+            case REGEN:
+                res+="Régénération de "+buff.power+" PV";
                 break;
         }
         return res;
