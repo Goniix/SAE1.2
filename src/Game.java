@@ -11,6 +11,9 @@ class Game{
     Question currentQuestion;
 
     int[] shopList;
+    int shopActions;
+
+    int level;
 /*
     int[] cardChoiceList;
     int cardChoiceResult;
